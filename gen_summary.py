@@ -4,15 +4,17 @@ import os
 import sys
 
 def generate_summary(root):
-    print("# Table of contents\n\n")
+    lines = []
     files = [f for f in os.listdir(root) if f.endswith('.md') and os.path.isfile(os.path.join(root, f))]
-    files.sort(reverse=True)
     for file in files:
         meta = get_meta(file)
         if 'title' not in meta: continue
+        date = meta['date'][:11]
+        lines.append(f"* [{date} {meta['title']}]({meta['file']})")
 
-        print(f"* [{meta['title']}]({meta['file']})")
-
+    lines.sort(reverse=True)
+    print("# Table of contents\n")
+    print('\n'.join(lines))
 
 def get_meta(filename):
     meta = {'file': filename}
