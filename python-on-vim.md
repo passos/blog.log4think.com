@@ -14,7 +14,7 @@ Add the following line to the top or bottom of your python source file.
 
 ## .vimrc ##
 
-I am using following settings in my ~/.vimrc for python
+I am using following settings in my `~/.vimrc` for python
 
     " Automatic reloading of .vimrc
     autocmd! bufwritepost .vimrc source %

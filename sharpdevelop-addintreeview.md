@@ -4,7 +4,7 @@ date: '2004-10-15 09:25:35 +0800'
 ---
 自从SharpDevelop 源码分析的系列文章发出来之后，很多朋友给了不错的评价，在这里先感谢各位朋友的鼓励。另外，评论中有位朋友想看看我在文章中提到的AddInTreeView插件，其实这个是个很简单的小东西，因此单独发在这里了。(好像没有找到那里能上传文件，因此直接贴代码了) 
 
-# AddinTreeViewCommand.cs #
+# AddinTreeViewCommand.cs
 
 	/*
 	 * Created by SharpDevelop.
