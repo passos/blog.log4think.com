@@ -8,9 +8,9 @@ date: '2011-03-08 03:07:00 +0800'
 
 第一步，找到需要转换的视频，利用QQ影音的"转码/截取/合并"功能，将想要转换的视频和音频分别截取出来。
 
-第二步，用MPlayer打开要前面准备好的视频，播放的同时按"Shift-D"也就是启动"开始/停止自动截图"功能，截取的图片默认是保存在C:\Documents and Settings\Administrator\.smplayer\screenshots下面。每分钟的视频大概会有1500多张图片。
+第二步，用MPlayer打开要前面准备好的视频，播放的同时按"Shift-D"也就是启动"开始/停止自动截图"功能，截取的图片默认是保存在`C:\Documents and Settings\Administrator\.smplayer\screenshots`下面。每分钟的视频大概会有1500多张图片。
 
-第三步，使用Ascgen dotNET的Batch Conversion功能，将截取的所有图片文件或目录加入到列表中，设置好输出目录，选择输出为jpg格式、75%大小，勾选Colour选项，然后点Convert开始转换。这一步会将原始图片转换为以ASCII字符构成的图片。
+第三步，使用`Ascgen dotNET`的`Batch Conversion`功能，将截取的所有图片文件或目录加入到列表中，设置好输出目录，选择输出为jpg格式、75%大小，勾选Colour选项，然后点Convert开始转换。这一步会将原始图片转换为以ASCII字符构成的图片。
 
 最后一步，在转换好的ASCII图片目录中，使用mencoder用命令行编码为视频：
 ```

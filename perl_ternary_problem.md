@@ -17,7 +17,7 @@ date: '2006-04-01 15:37:47 +0800'
 
 可奇怪的是，当无论total是否有定义 ratio的结果居然都是N/A. 可后面`if else`的语句是没有问题的，真的是让我百思不得其解。跑去查Perl的文档，其中对于?:的运算符号的解释是 
 
-_Ternary ``?:'' is the conditional operator, just as in C. It works much like an if-then-else. If the argument before the ? is true, the argument before the : is returned, otherwise the argument after the : is returned._
+_Ternary `?:` is the conditional operator, just as in C. It works much like an if-then-else. If the argument before the ? is true, the argument before the : is returned, otherwise the argument after the : is returned._
 
 貌似是return the argument，于是乎脑子里突然闪过一个念头, 在前后都加上了括号...
 

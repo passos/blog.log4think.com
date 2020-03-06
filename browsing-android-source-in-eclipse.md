@@ -2,18 +2,14 @@
 title: 在Eclipse中查看Android SDK的源代码
 date: '2010-08-27 15:43:56 +0800'
 ---
-via <a href="http://stuffthathappens.com/blog/2008/11/01/browsing-android-source-in-eclipse/">http://stuffthathappens.com/blog/2008/11/01/browsing-android-source-in-eclipse/</a>
+via <a href="https://stuffthathappens.com/blog/2008/11/01/browsing-android-source-in-eclipse/">https://stuffthathappens.com/blog/2008/11/01/browsing-android-source-in-eclipse/</a>
 
-Google的Android SDK中包含一个android.jar文件，里面有Android所有的公开类的API接口。同时，Google还提供了一个Eclipse插件，可以很容易的开始进行开发。但是，这里并没有一个类似于androidSrc.jar的文件，因此当我们试图在Eclipse去查看Android SDK的源代码的时候，会得到下面这样的一个页面：
+Google的Android SDK中包含一个android.jar文件，里面有Android所有的公开类的API接口。同时，Google还提供了一个Eclipse插件，可以很容易的开始进行开发。但是，这里并没有一个类似于androidSrc.jar的文件，因此当我们试图在Eclipse去查看Android SDK的源代码的时候，会得到"源码无法找到"这样一个页面
 
-<img title="Source Not Found" src="http://stuffthathappens.com/blog/wp-content/uploads/2008/11/picture-2.png" alt="" />
-
-Google已经发布了Android所有的源代码，很大。要在Eclipse中查看Android的源代码，需要去<a href="http://source.android.com/">http://source.android.com/</a>（国内需翻墙），Get Source那个页面内按照指示一步步的将所有的东西都通过Git弄下来。很值得抽出一个晚上的时间来做这件事，因为如果能够随时查看源码，对于理解SDK如何工作的是非常有帮助的。
+Google已经发布了Android所有的源代码，很大。要在Eclipse中查看Android的源代码，需要去<a href="https://source.android.com/">https://source.android.com/</a>（国内需翻墙），Get Source那个页面内按照指示一步步的将所有的东西都通过Git弄下来。很值得抽出一个晚上的时间来做这件事，因为如果能够随时查看源码，对于理解SDK如何工作的是非常有帮助的。
 
 ### 链接到Eclipse
-现在我们有了源码，应该可以告诉Eclipse如何找到它了。右键点击android.jar--属性，可是却发现了这样的信息：
-
-<img title="Modifications Not Allowed" src="http://stuffthathappens.com/blog/wp-content/uploads/2008/11/picture-1.png" alt="" />
+现在我们有了源码，应该可以告诉Eclipse如何找到它了。右键点击android.jar--属性，可是却发现了这样的信息："Modifications Not Allowed"
 
 嗯....那段话的大意是，当前的class path的设置属于'Android Library'，不允许用户修改。好吧，只能去看看ADT的源码了，看能否找到什么办法。
 
@@ -24,7 +20,9 @@ Google已经发布了Android所有的源代码，很大。要在Eclipse中查看
 ```
 IPath android_src = new Path(AdtPlugin.getOsAbsoluteAndroidSources());
 ```
+
 好，再来看看 AdtPlugin.java:
+
 ```
 /** Returns the absolute android sources path in the sdk */
 public static String getOsAbsoluteAndroidSources() {
@@ -36,10 +34,12 @@ public static String getOsRelativeAndroidSources() {
   return AndroidConstants.FD_ANDROID_SOURCES;
 }
 ```
+
 最后来看看 `AndroidConstants.java`: `public static final String FD_ANDROID_SOURCES = "sources";`
 搞定！
 
 ### 解决方案 #1
+
 根据上面的分析，我们可以在android SDK的安装目录内创建一个sources目录，与android.jar位于同一个目录内。之后，我们可以在之前下好的Android源码中找到所有我们需要的代码。SDK的代码在frameworks/base/core/java，在这个目录下有一个android目录，我们需要将这个目录拷贝（链接）到SDK安装目录中的sources目录。你可能需要想想办法，把所有分散在不同Component的源码都弄到一起去。最终我们的目录结构大致如下：
 ```
 SDK_PATH
@@ -56,16 +56,16 @@ SDK_PATH
 ```
 我把所有这样的目录都弄进来了，但是没有详细记录。
 
-译注（也就是我Simon Liu）：
+译注：
 上面的代码是适用于以前的老版本的ADT，目前最新版本的ADT已经不适用了。经过查看源代码发现，最新版本的ADT需要在SDK目录下的platforms\android-X对应的目录下建立sources目录，其中X是3、4、7、8之一的数字，对应不同的SDK版本。这也是一个比较合理的方案，毕竟不同版本的SDK的源码还是不一样的。
 
-如果你在Linux或者Mac下工作，sources的源码目录结构可以用我写的如下的一个Shell脚本来完成这个事情，在Android的源码目录下运行这个脚本，然后会在~/workspace/src-tree创建"几乎"所有Java源码的soft symbol link。之后也可以用tar带-h参数打包到windows下使用。你可以根据自己的需求修改一下。
+如果你在Linux或者Mac下工作，sources的源码目录结构可以用我写的如下的一个Shell脚本来完成这个事情，在Android的源码目录下运行这个脚本，然后会在 `~/workspace/src-tree` 创建"几乎"所有Java源码的soft symbol link。之后也可以用tar带-h参数打包到windows下使用。你可以根据自己的需求修改一下。
 ```
 simon@simon-desktop:~/bin$ cat make-src-tree
 #!/bin/bash
-# Author: Simon Liu <simon @log4think.com>, Beijing, China
+# Author: Simon Liu <simon@log4think.com>
 # Date: 2010-08-27
-# License: GPL
+# License: MIT
 
 curr_dir=$PWD
 dest_dir=~/workspace/src-tree
@@ -96,12 +96,11 @@ do
 done
 ```
 
-现在，当我再去查看Android SDK类的时候，可以看到源码了：
+现在，当我再去查看Android SDK类的时候，可以看到源码了
 
-<img title="Browsing Source" src="http://stuffthathappens.com/blog/wp-content/uploads/2008/11/picture-3.png" alt="" />
 
 ### 解决方案 #2
 
 如果你实在不愿意把所有的Android源码拷贝到SDK目录里面去，也可以创建一个Eclispe User Library并把源码附加上去。
 
-<div>via <a href="http://stuffthathappens.com/blog/2008/11/01/browsing-android-source-in-eclipse/">http://stuffthathappens.com/blog/2008/11/01/browsing-android-source-in-eclipse/</a></div>
+<div>via <a href="https://stuffthathappens.com/blog/2008/11/01/browsing-android-source-in-eclipse/">https://stuffthathappens.com/blog/2008/11/01/browsing-android-source-in-eclipse/</a></div>

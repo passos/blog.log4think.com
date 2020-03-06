@@ -2,9 +2,9 @@
 title: Perl与数据库DBI快速入门
 date: '2005-09-13 18:27:18 +0800'
 ---
-上次的文章[Perl无废话入门指南](http://log4think.com/perl_fast_tutorial/)中，简单的介绍了Perl的开发环境。为了完成提到的任务，还需要做几个知识点。无论是写脚本还是做CGI，如何使用Perl来访问数据库就是很有用的一个知识。
+上次的文章[Perl无废话入门指南](https://log4think.com/perl_fast_tutorial/)中，简单的介绍了Perl的开发环境。为了完成提到的任务，还需要做几个知识点。无论是写脚本还是做CGI，如何使用Perl来访问数据库就是很有用的一个知识。
 
-各种语言和开发环境访问数据库有各种不同的方式，比如可以用C和数据库提供的API接口来进行访问，也可以用JDBC、ODBC、ADO等封装好的统一接口来进行访问。Perl访问数据库最常用的包是DBI，可以在[www.cpan.org](http://www.cpan.org)找到。另外还需要安装对应数据库的驱动包，例如DBD::MySQL、DBD::Oracle、DBD::Sybase或者DBD::ODBC等。具体的安装方法请参考上期文章，在此就不赘述了。
+各种语言和开发环境访问数据库有各种不同的方式，比如可以用C和数据库提供的API接口来进行访问，也可以用JDBC、ODBC、ADO等封装好的统一接口来进行访问。Perl访问数据库最常用的包是DBI，可以在[www.cpan.org](https://www.cpan.org)找到。另外还需要安装对应数据库的驱动包，例如DBD::MySQL、DBD::Oracle、DBD::Sybase或者DBD::ODBC等。具体的安装方法请参考上期文章，在此就不赘述了。
 
 下文以常见的MySQL为例，说说如何实现对数据库的操作。
 

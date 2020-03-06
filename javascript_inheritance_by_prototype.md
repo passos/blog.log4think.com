@@ -8,7 +8,7 @@ date: '2016-12-13 19:24:52 +0800'
 
 ### 第一种方式
 
-来自于 <a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Details_of_the_Object_Model">MDN 对象模型的细节</a>
+来自于 [MDN 对象模型的细节](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Details_of_the_Object_Model)
 
 ```
 function Employee1 (name, dept) {
@@ -44,7 +44,6 @@ console.log(WorkerBee1.prototype.isPrototypeOf(e1))
 console.log(e1)
 ```
 
-<img src="http://log4think.com/wp-content/uploads/2016/12/prototype_inheritance_1.png" alt="Alt text" title="第一种方式的对象结构" />
 
 ### 第二种方式
 
@@ -92,8 +91,6 @@ console.log(WorkerBee2.prototype.isPrototypeOf(e2))
 console.log(e2)
 ```
 
-<img src="http://log4think.com/wp-content/uploads/2016/12/prototype_inheritance_2.png" alt="Alt text" title="第二种方式的对象结构" />
-
 可以看到，区别主要在于，直接 `Child.prototype = new Parent()` 会把定义在 Parent 里面的方法也带到 prototype 里面去。另外，这种方式并没有执行父类的构造函数。
 
 ## 对于定义在 prototype 里面的方法呢
@@ -135,8 +132,6 @@ console.log(Employee3.prototype.isPrototypeOf(e3))
 console.log(WorkerBee3.prototype.isPrototypeOf(e3))
 console.log(e3)
 ```
-
-<img src="http://log4think.com/wp-content/uploads/2016/12/prototype_inheritance_3.png" alt="Alt text" title="第一种方式改进后的对象结构" />
 
 ### 第二种方式的改进
 
@@ -183,11 +178,9 @@ console.log(WorkerBee4.prototype.isPrototypeOf(e4))
 console.log(e4)
 ```
 
-<img src="http://log4think.com/wp-content/uploads/2016/12/prototype_inheritance_4.png" alt="Alt text" title="第二种方式改进后的对象结构" />
-
 注意观察 `constructor` 和 `__proto__` 属性。
 
-#   要执行所有构造函数
+# 要执行所有构造函数
 
 上述第二种方法，都没有执行父类的构造函数，也就没有真正的继承父类的初始化数据。为了弥补这一点，如下两种写法都可以达到目的。
 
@@ -243,8 +236,6 @@ console.log(WorkerBee5.prototype.isPrototypeOf(e5))
 console.log(e5)
 ```
 
-<img src="http://log4think.com/wp-content/uploads/2016/12/prototype_inheritance_5.png" alt="Alt text" title="利用 super 变量" />
-
 ## 类似，但是用 `Parent.apply` 方法
 
 ```
@@ -289,5 +280,3 @@ console.log(Employee6.prototype.isPrototypeOf(e6))
 console.log(WorkerBee6.prototype.isPrototypeOf(e6))
 console.log(e6)
 ```
-
-<img src="http://log4think.com/wp-content/uploads/2016/12/prototype_inheritance_6.png" alt="Alt text" title="利用 Parent.apply 方法" />

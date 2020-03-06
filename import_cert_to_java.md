@@ -25,7 +25,7 @@ For Mac:
 
 第二个命令将之前建好的keystore中的证书导入jre自带的keystore文件中。过程中会要求输入目标keystore（也就是jre自带的keystore）文件的密码，这个密码默认是 changeit （linux和mac下），或者是 changeme 。
 
-之后，重启Eclipse，再次连结TFS服务器，即可成功通过服务器验证。此外，可以下载一个小工具<a href="https://confluence.atlassian.com/download/attachments/180292346/SSLPoke.class?version=1&modificationDate=1236556489366&api=v2">SSLPoke</a>验证证书是否导入正常，下载之后在文件所在目录下，命令行运行
+之后，重启Eclipse，再次连结TFS服务器，即可成功通过服务器验证。此外，可以下载一个小工具 [SSLPoke](https://confluence.atlassian.com/download/attachments/180292346/SSLPoke.class?version=1&modificationDate=1236556489366&api=v2) 验证证书是否导入正常，下载之后在文件所在目录下，命令行运行
 
     $ java SSLPoke tfs.yourserver.com 4343
     Successfully connected

@@ -4,7 +4,7 @@ date: '2010-11-12 18:15:39 +0800'
 ---
 # AP Logger Architecture
 
-![AP Logger Architecture](http://log4think.com/wp-content/uploads/2010/11/aplogd.jpg)
+![AP Logger Architecture]
 
 The above image shows the architecture of Android logging system.It provides a java class for logging named android.util.Log. It also provides log macros for native C applications in liblog.
 

@@ -4,7 +4,7 @@ date: '2010-03-13 07:21:01 +0800'
 ---
 前几天一时冲动在国外买了个VPS主机，最大的好处是拥有全部的权限，操作系统自己想怎么搞就怎么搞。于是动了给公司内网通过这个VPS作为中转开个ssh隧道的念头，这样就不用很麻烦的每次都要去连vpn了。
 
-公司内网访问外网目前不需要设置代理服务器，但是因为防火墙的原因，要访问公司内网地址还是需要通过vpn才能访问。通过ssh建立隧道的文章已经很多了，<a href="https://www.ibm.com/developerworks/cn/linux/l-cn-sshforward/" target="_blank">这篇文章</a> 讲的很详细，不熟悉的同学可以去学习下。
+公司内网访问外网目前不需要设置代理服务器，但是因为防火墙的原因，要访问公司内网地址还是需要通过vpn才能访问。通过ssh建立隧道的文章已经很多了，[这篇文章](https://www.ibm.com/developerworks/cn/linux/l-cn-sshforward/) 讲的很详细，不熟悉的同学可以去学习下。
 
 我面临的情况，无非是由于防火墙的原因，内网可以出来，但是外部连不进去。因此需要通过ssh端口转发，从内网建立一个到VPS主机的ssh隧道。由于只能内部往外连接，因此使用的是ssh的远程端口映射（概念不懂的去看前面推荐的文章）：`ssh -qnfNT -g -R 3322:localhost:22 myname@vpshost`这样就在vpshost上开了一个端口3322，和内网的22端口建立起了一个ssh隧道。在vpshost上，通过 ssh -p 3322 localhost 就可以直接连到公司内网了。
 
@@ -18,7 +18,7 @@ date: '2010-03-13 07:21:01 +0800'
 
 方法2其实有很多工具可以实现，比如iptables、netcat之类的。我嫌iptables太麻烦，而nc又不支持多连接。于是经过一番google，发现了socat这个极其变态强大的工具--果然一不小心就知道的太多了。
 
-socat本质上就是一个数据管道：从一个数据源接收数据流，然后转发到另外的数据目的地。支持socket,tcp,udp,unix domain,pipe,文件等等几乎各类你能想到和想不到的数据源。socat有海量的参数，我就不一一解释了，想了解的同学可以去看文档（http://www.dest-unreach.org/socat/doc/socat.html），有不少例子应该能够照猫画虎的满足需求。我从文档中的例子里抄了一个TCP方式的端口转发
+socat本质上就是一个数据管道：从一个数据源接收数据流，然后转发到另外的数据目的地。支持socket,tcp,udp,unix domain,pipe,文件等等几乎各类你能想到和想不到的数据源。socat有海量的参数，我就不一一解释了，想了解的同学可以去看[文档](http://www.dest-unreach.org/socat/doc/socat.html)，有不少例子应该能够照猫画虎的满足需求。我从文档中的例子里抄了一个TCP方式的端口转发
 ```
 vps# socat TCP4-LISTEN:2222,reuseaddr,fork TCP4:localhost:3322
 ```

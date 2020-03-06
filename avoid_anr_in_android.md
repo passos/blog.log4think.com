@@ -2,10 +2,9 @@
 title: 避免Android开发中的ANR
 date: '2010-08-27 18:03:45 +0800'
 ---
-via:  <a href="http://code.google.com/events/io/2010/sessions/writing-zippy-android-apps.html" target="_blank">Writing Zippy Android Apps</a>
+via:  <a href="https://code.google.com/events/io/2010/sessions/writing-zippy-android-apps.html" target="_blank">Writing Zippy Android Apps</a>
 
 ## ANR是什么
-<a href="http://log4think.com/wordpress/wp-content/uploads/2010/08/ANR.jpg"><img class="alignnone size-full wp-image-212" title="ANR" src="http://log4think.com/wordpress/wp-content/uploads/2010/08/ANR.jpg" alt="" width="324" height="488" /></a>
 
 ANRs ("Application Not Responding")，意思是"应用没有响应"。
 
@@ -24,22 +23,15 @@ ANRs ("Application Not Responding")，意思是"应用没有响应"。
 应用应该在5秒或者10秒内响应，否则用户会觉得"这个应用很垃圾""烂""慢"...等等
 
 ## 一些数据(Nexus One为例)
-• ~0.04 ms - 通过管道进程从A->B再从B->A写一个字节；或者（从dalvik）读一个简单的/proc文件
-
-• ~0.12 ms - 由A->B 再由B->A 进行一次Binder的RPC调用
-
-• ~5-25 ms - 从未缓冲的flash
-• ~5-200+(!) ms - 向为缓冲的flash中写点东西（下面是具体数据）
-
-•    16 ms - 60fps的视频中的一帧
-
-•    41 ms - 24fps的视频中的一帧
-
-• 100-200 ms - human perception of slow action
-
-• 108/350/500/800 ms - 3G网络上ping（可变）
-
-• ~1-6+ seconds - 通过HTTP在3G网络上获取6k的数据
+- ~0.04 ms - 通过管道进程从 A->B 再从 B->A 写一个字节；或者（从dalvik）读一个简单的/proc文件
+- ~0.12 ms - 由 A->B 再由 B->A 进行一次Binder的RPC调用
+- ~5-25 ms - 从未缓冲的flash
+- ~5-200+(!) ms - 向为缓冲的flash中写点东西（下面是具体数据）
+-    16 ms - 60fps 的视频中的一帧
+-    41 ms - 24fps 的视频中的一帧
+- 100-200 ms - human perception of slow action
+- 108/350/500/800 ms - 3G网络上ping（可变）
+- ~1-6+ seconds - 通过HTTP在3G网络上获取6k的数据
 
 ## android.os.AsyncTask
 AsyncTask 可以与UI线程很方便的配合，这个类可以在后台执行一些操作，并在执行结束的时候将结果发布到UI线程中去，并且无需使用线程或handler来控制。
@@ -48,17 +40,17 @@ AsyncTask 可以与UI线程很方便的配合，这个类可以在后台执行�
 ```
 private class DownloadFilesTask extends AsyncTask {
 	protected Long doInBackground(URL... urls) {  // on some background thread
-			int count = urls.length;
-			long totalSize = 0;
-			for (int i = 0; i < count; i++) {
-				totalSize += Downloader.downloadFile(urls[i]);
-				publishProgress((int) ((i / (float) count) * 100));
-			}
+		int count = urls.length;
+		long totalSize = 0;
+		for (int i = 0; i < count; i++) {
+			totalSize += Downloader.downloadFile(urls[i]);
+			publishProgress((int) ((i / (float) count) * 100));
+		}
 
-			return totalSize;
-     	} 
+		return totalSize;
+ 	} 
 
-		protected void onProgressUpdate(Integer... progress) {  // on UI thread!
+	protected void onProgressUpdate(Integer... progress) {  // on UI thread!
 		setProgressPercent(progress[0]);
 	} 
 
@@ -68,17 +60,17 @@ private class DownloadFilesTask extends AsyncTask {
 } 
 
 new DownloadFilesTask().execute(url1, url2, url3);  // call from UI thread!
+
 private boolean handleWebSearchRequest(final ContentResolver cr) {
-            ...
+    ...
 	new AsyncTask() {
 	    protected Void doInBackground(Void... unused) {
 	    	Browser.updateVisitedHistory(cr, newUrl, false);
 	    	Browser.addSearchUrl(cr, newUrl);
 	    	return null;
 	    } 
-
 	}.execute()
-            ...
+    ...
     return true; 
 
 }
@@ -86,17 +78,14 @@ private boolean handleWebSearchRequest(final ContentResolver cr) {
 
 ## AsyncTask要点
 1、必须从主线程调用，或者线程中有Handler或Looper。
-
 2、不要在一个可能会被另外一个AsyncTask调用的库里面使用AsyncTask（AsyncTask是不可重入的）
-
 3、如果从一个activity中调用，activity进程可能会在AsyncTask结束前退出，例如：
 
-<ul>
-<li> 用户退出了activity</li>
-<li>系统内存不足</li>
-<li>系统暂存了activity的状态留待后用</li>
-<li>系统干掉了你的线程</li>
-</ul>
+- 用户退出了activity
+- 系统内存不足
+- 系统暂存了activity的状态留待后用
+- 系统干掉了你的线程
+
 如果AsyncTask中的工作很重要，应该使用......
 
 ## android.app.IntentService
@@ -117,11 +106,10 @@ All requests are handled on a single worker thread -- they may take as long as n
 
 ## IntentService 的好处
 
-<ul>
-<li>Acitivity的进程，当处理Intent的时候，会产生一个对应的Service</li>
-<li>Android的进程处理器现在会尽可能的不kill掉你</li>
-<li>非常容易使用</li>
-</ul>
+- Acitivity的进程，当处理Intent的时候，会产生一个对应的Service
+- Android的进程处理器现在会尽可能的不kill掉你
+- 非常容易使用
+
 日历中IntentService的应用
 ```
 public class DismissAllAlarmsService extends IntentService {
@@ -135,27 +123,24 @@ in AlertReceiver extends BroadcastReceiver, onReceive()：  (main thread)
     Intent intent = new Intent(context, DismissAllAlarmsService.class);
     context.startService(intent);
 ```
+
 ## 其它技巧
+
 1、当启动AsyncTask的时候，立刻disable UI元素（按钮等等）。
-
 2、显示一些动画，表示在处理中
-
 3、使用进度条对话框
-
 4、使用一个定时器作为耗时警告，在AsyncTask开始时启动定时器，在AsyncTask的onPostExecute方法中取消定时器。
-
 5、当不确定要耗时多久的时候，组合使用上述所有方法
 
 ## 总结
 
-<ul>
-<li>离开主线程！</li>
-<li>磁盘和网络操作不是马上就能完的</li>
-<li>了解sqlite在干嘛</li>
-<li>进度展示很好</li>
-</ul>
+- 离开主线程！
+- 磁盘和网络操作不是马上就能完的
+- 了解sqlite在干嘛
+- 进度展示很好
+
 PS，在视频讲座中，作者还提到，Chrome团队为了避免Jank（响应超时而死掉），几乎所有的功能和任务都会在子线程里面去做。这一点也值得在Android中借鉴。
 
-刘金雨译:  <a href="http://log4think.com/avoid_anr_in_android">避免Android开发中的ANR</a>
-全文via:  <a href="http://code.google.com/events/io/2010/sessions/writing-zippy-android-apps.html" target="_blank">Writing Zippy Android Apps</a>
+刘金雨译:  <a href="https://log4think.com/avoid_anr_in_android">避免Android开发中的ANR</a>
+全文via:  <a href="https://code.google.com/events/io/2010/sessions/writing-zippy-android-apps.html" target="_blank">Writing Zippy Android Apps</a>
 
