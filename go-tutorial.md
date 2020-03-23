@@ -2,8 +2,10 @@
 title: Go 编程语言入门教程
 date: '2010-03-31 02:21:04 +0800'
 ---
-> 原文：http://golang.org
-> 翻译：刘金雨 http://log4think.com
+
+# 2010-03-31  Go 编程语言入门教程
+
+> 原文：[http://golang.org](http://golang.org) 翻译：刘金雨 [http://log4think.com](http://log4think.com)
 
 ## 介绍
 
@@ -11,14 +13,16 @@ date: '2010-03-31 02:21:04 +0800'
 
 此外还有一份《三日入门》的教程可供参考:
 
-- [第一日](http://www.yeeyan.com/doc/GoCourseDay1.pdf)
-- [第二日](http://www.yeeyan.com/doc/GoCourseDay2.pdf)
-- [第三日](http://www.yeeyan.com/doc/GoCourseDay3.pdf)
+* [第一日](http://www.yeeyan.com/doc/GoCourseDay1.pdf)
+* [第二日](http://www.yeeyan.com/doc/GoCourseDay2.pdf)
+* [第三日](http://www.yeeyan.com/doc/GoCourseDay3.pdf)
 
 本文将会以一系列适当的程序来说明语言的一些关键特性。所有的示例程序都是可运行的（在撰写本文时），并且这些程序都会提交到版本库的
-```
+
+```text
 /doc/progs/
 ```
+
 目录下。
 
 程序片段都会标注上在源文件中的行号，为了清晰起见，空行前面的行号留空。
@@ -27,140 +31,181 @@ date: '2010-03-31 02:21:04 +0800'
 
 先从一个最常见的开始:
 
-    05    package main
+```text
+05    package main
 
-    07    import fmt "fmt"  // 本包实现了格式化输入输出
+07    import fmt "fmt"  // 本包实现了格式化输入输出
 
-    09    func main() {
-    10        fmt.Printf("Hello, world; or &Kappa;&alpha;&lambda;&eta;&mu;έ&rho;&alpha; &kappa;ό&sigma;&mu;&epsilon;; or こんにちは 世界n");
-    11    }
+09    func main() {
+10        fmt.Printf("Hello, world; or &Kappa;&alpha;&lambda;&eta;&mu;έ&rho;&alpha; &kappa;ό&sigma;&mu;&epsilon;; or こんにちは 世界n");
+11    }
+```
 
 每份Go的源文件都会使用
-```
+
+```text
 package
 ```
+
 语句声明它的包名。同时也可以通过导入其它包来使用其中定义的功能。这段代码导入了包
-```
+
+```text
 fmt
 ```
+
 来调用我们的老朋友--现在它的开头字母是大写的，并且前面带有包名限定
-```
+
+```text
 fmt.Printf
 ```
+
 。
 
 函数的声明使用关键字func，整个程序将会从为
-```
+
+```text
 main
 ```
+
 包中的
-```
+
+```text
 main
 ```
+
 函数开始（经过初始化之后）。
 
 字符串常量可以包含Unicode字符，采用UTF-8编码（事实上，所有Go程序的源文件都是使用UTF-8编码的）。
 
 注释的方式同C++一样：
-```
+
+```text
 /* ... */
 ```
+
 或
-```
+
+```text
 // ...
 ```
+
 稍后我们会继续提到
-```
+
+```text
 print
 ```
+
 。
 
 ## 编译
 
 Go是一个编译型语言。目前有两个编译器，其中
-```
+
+```text
 gccgo
 ```
+
 编译器采用了GCC作为后端，此外还有一系列根据其所适用的架构命名的编译器，例如
-```
+
+```text
 6g
 ```
+
 适用于64位的x86结构，8g 适用于32位的x86结构，等等。这些编译器比gccgo运行的更快、生成的代码更加有效率。在撰写本文的时候（2009年底），他们还具有一个更加健壮的运行期系统，但是gccgo也正在迎头赶上。
 
 下面来看看如何编译和运行程序。采用
-```
+
+```text
 6g
 ```
+
 是这样的
 
-    $ 6g helloworld.go  编译; 中间代码位于 helloworld.6 中
-    $ 6l helloworld.6   链接; 输出至 6.out
-    $ 6.out
-    Hello, world; or &Kappa;&alpha;&lambda;&eta;&mu;έ&rho;&alpha; &kappa;ό&sigma;&mu;&epsilon;; or こんにちは 世界
-    $
+```text
+$ 6g helloworld.go  编译; 中间代码位于 helloworld.6 中
+$ 6l helloworld.6   链接; 输出至 6.out
+$ 6.out
+Hello, world; or &Kappa;&alpha;&lambda;&eta;&mu;έ&rho;&alpha; &kappa;ό&sigma;&mu;&epsilon;; or こんにちは 世界
+$
 ```
+
+```text
 gccgo
 ```
+
 的方式看起来更加传统一些。
 
-    $ gccgo helloworld.go
-    $ a.out
-    Hello, world; or &Kappa;&alpha;&lambda;&eta;&mu;έ&rho;&alpha; &kappa;ό&sigma;&mu;&epsilon;; or こんにちは 世界
-    $
+```text
+$ gccgo helloworld.go
+$ a.out
+Hello, world; or &Kappa;&alpha;&lambda;&eta;&mu;έ&rho;&alpha; &kappa;ό&sigma;&mu;&epsilon;; or こんにちは 世界
+$
+```
 
 ## Echo
 
 下一步，来实现一个Unix的传统命令Echo：
 
-    05    package main
+```text
+05    package main
 
-    07    import (
-    08        "os";
-    09        "flag";  // command line option parser
-    10    )
+07    import (
+08        "os";
+09        "flag";  // command line option parser
+10    )
 
-    12    var omitNewline = flag.Bool("n", false, "don't print final newline")
+12    var omitNewline = flag.Bool("n", false, "don't print final newline")
 
-    14    const (
-    15        Space = " ";
-    16        Newline = "n";
-    17    )
+14    const (
+15        Space = " ";
+16        Newline = "n";
+17    )
 
-    19    func main() {
-    20        flag.Parse();   // Scans the arg list and sets up flags
-    21        var s string = "";
-    22        for i := 0; i < flag.NArg(); i++ {
-    23            if i > 0 {
-    24                s += Space
-    25            }
-    26            s += flag.Arg(i);
-    27        }
-    28        if !*omitNewline {
-    29            s += Newline
-    30        }
-    31        os.Stdout.WriteString(s);
-    32    }
+19    func main() {
+20        flag.Parse();   // Scans the arg list and sets up flags
+21        var s string = "";
+22        for i := 0; i < flag.NArg(); i++ {
+23            if i > 0 {
+24                s += Space
+25            }
+26            s += flag.Arg(i);
+27        }
+28        if !*omitNewline {
+29            s += Newline
+30        }
+31        os.Stdout.WriteString(s);
+32    }
+```
 
 这段程序很小，但是却有几个新出现的概念。前面这个例子中，我们看到可以使用
-```
+
+```text
 func
 ```
+
 来声明一个函数，同时关键字
-```
+
+```text
 var、const
 ```
+
 和
-```
+
+```text
 type
 ```
+
 目前还没有用到）也可以用于声明，就好像
-```
+
+```text
 import
 ```
+
 一样。
 
 注意，我们可以将同一类的声明放到括号中，以分号分隔。例如第7-10行和第14-17行。但也并非一定要如此，例如可以这样写
-```
+
+```text
     const Space = " "
     const Newline = "n"
 
@@ -170,80 +215,112 @@ import
 
 比对一下
 ```
+
 echo
-```
+
+```text
 的源代码，只有第8、15和21行必须要加分号，当然第22行中的
 ```
+
 for
-```
+
+```text
 语句中为了分隔三个表达式也需要加分号。第9、16、26和31行的分号都不是必须的，加上分号只是为了以后再增加语句的时候方便而已。
 
 这个程序导入了os包以访问
 ```
+
 Stdout
-```
+
+```text
 变量，
 ```
+
 Stdout
-```
+
+```text
 的类型是
 ```
-*os.File
-```
+
+\*os.File
+
+```text
 。
 ```
+
 import
-```
+
+```text
 语句实际上是个声明：通常情况下（如hello world程序中那样），它声明了一个标识符
 ```
+
 fmt
-```
+
+```text
 用于访问导入的包的成员变量，而包是从当前目录或标准库下的
 ```
+
 fmt
-```
+
+```text
 文件中导入的。在这个程序中，我们为导入的包显式的指定了一个名字，默认情况下，包名是采用在导入的包里面已经定义好的名字，通常会与文件名一致。因此在这个"hello world"程序中，可以只写
 ```
+
 import "fmt"
-```
+
+```text
 。你可以任意为包指定一个导入名，但通常只有在解决名字冲突的情况下才有必要这样做。
 
 有了
 ```
+
 os.Stdout
-```
+
+```text
 ，我们就可以用它的
 ```
+
 WriteString
-```
+
+```text
 方法打印字符串了。
 
 导入了
 ```
+
 实 际flag
-```
+
+```text
 包之后，第12行创建了一个全局变量来保存 echo 的
 ```
+
 -n
-```
+
+```text
 选项标志。
 ```
+
 omitNewline
-```
+
+```text
 变量的类型是 *bool --指向bool值的指针。
 
 在
 ```
+
 main.main
-```
+
+```text
 中进行了参数解析，并创建了一个本地字符串类型的变量用于构造输出的内容。声明语句如下
 
     var s string = "";
 
 这里用到了关键字
 ```
+
 var
-```
+
+```text
 ，后面跟变量名和数据类型，之后可以继续接=来赋初值。
 
 Go试图尽量保持简洁，这个声明也可以用更短的形式。因为初值是一个字符串类型的常量，没有必要再声明数据类型了，因此这个声明可以写成这样：
@@ -256,136 +333,194 @@ Go试图尽量保持简洁，这个声明也可以用更短的形式。因为初
 
 操作符
 ```
+
 :=
-```
+
+```text
 在 Go 语言里经常会用在赋初值的声明中，比如下面这个
 ```
+
 for
-```
+
+```text
 语句的声明：
 
     22    for i := 0; i < flag.NArg(); i++ {
 ```
+
 flag
-```
+
+```text
 包会解析命令行参数，并将参数值保存在一个列表中。
 
 Go语言中的
 ```
+
 for
-```
+
+```text
 语句和C语言中的有几个不同之处。首先，for是唯一的循环语句，没有
 ```
+
 while
-```
+
+```text
 语句或
 ```
+
 do
-```
+
+```text
 语句。其次，for语句后面的三个子句不需要圆括号，但大括号是必须的。这一条对
 ```
+
 if
-```
+
+```text
 和
 ```
+
 switch
-```
+
+```text
 语句同样适用。稍后还会有几个例子演示
 ```
+
 for
-```
+
+```text
 语句的其它用法。
 
 循环体中通过追加（+=）标志和空格构造字符串
 ```
+
 s
-```
+
+```text
 。循环之后，如果没有设置
 ```
+
 -n
-```
+
+```text
 标志，程序追加一个空行，最后输出结果。
 
 注意，函数
 ```
+
 main.main
-```
+
+```text
 没有返回值。它就是这样定义的，如果到达了
 ```
+
 main.main
-```
+
+```text
 的末尾就表示"成功"，如果想表明出错并返回，可以调用
 
     os.Exit(1)
 ```
+
 os
-```
+
+```text
 包还包含一些其他的常用功能，例如
 ```
+
 os.Args
-```
+
+```text
 会被
 ```
+
 flag
-```
+
+```text
 包用于访问命令行参数。
 
 ## 插播：数据类型 Types
 
 Go支持一些常见的数据类型，例如
 ```
+
 int
-```
+
+```text
 和
 ```
+
 float
-```
+
+```text
 ，其值采用机器"适用"的大小来表示。也有定义了明确大小的数据类型，例如
 ```
+
 int8
-```
+
+```text
 、
 ```
+
 float64
-```
+
+```text
 等，以及无符号整数类型，例如
 ```
+
 uint
-```
+
+```text
 、
 ```
+
 uint32
-```
+
+```text
 等。这些都是完全不同的数据类型，即使
 ```
+
 int
-```
+
+```text
 和
 ```
+
 int32
-```
+
+```text
 都是32位整数，但它们是不同的类型。对于表示字符串元素的类型
 ```
+
 byte
-```
+
+```text
 和
 ```
+
 uint8
-```
+
+```text
 也是同样如此。
 
 说到字符串（
 ```
+
 string
-```
+
+```text
 ），这也是一个内置的数据类型。字符串的值不仅仅是一个
 ```
+
 byte
-```
+
+```text
 的数组，它的值是**不可改变**的。一旦确定了一个字符串的值，就不能再修改了。但一个字符串**变量**的值可以通过重新赋值来改变。下面这段来自
 ```
+
 strings.go
-```
+
+```text
 的代码是合法的：
 
     11    s := "hello";
@@ -401,8 +536,10 @@ strings.go
 
 按照C++的说法，Go的字符串有点类似带了
 ```
+
 const
-```
+
+```text
 修饰符，指向字符串的指针也类似于一个 const 字符串的引用（reference）.
 
 没错，前面看到的那些是指针，然而Go语言中的指针在用法方面有所简化，后文会提到。
@@ -413,34 +550,48 @@ const
 
 数组同字符串一样是"值"，但是却是可变的。与C不同的是，C语言中
 ```
+
 arrayOfInt
-```
+
+```text
 可以当做一个指向int的指针来用。在Go中，因为数组是**值**，因此
 ```
+
 arrayOfInt
-```
+
+```text
 被看做（也被用做）指向数组的指针。
 
 数组的大小是其数据类型的一部分。但是，你可以声明一个**slice**变量，然后可以用一个指向具有相同元素类型的数组指针给它赋值，更常见的是用一个形式为
 ```
-a[low : high]
-```
+
+a\[low : high\]
+
+```text
 的**slice**表达式，该表达式表示下标从
 ```
+
 low
-```
+
+```text
 到
 ```
+
 high-1
-```
+
+```text
 的子数组。 Slice 类型类似数组，但没有显式指定大小(
 ```
-[]
-```
+
+\[\]
+
+```text
 之于
 ```
-[10]
-```
+
+\[10\]
+
+```text
 )，用于表示一个隐性（通常是匿名的）数组。如果不同的 slice 都是表示同一个数组中的数据，它们可以共享该数组的内存，但不同的数组则永远不会共享内存数据。
 
 Slice 在 Go 程序中比数组更常见。它更灵活，并且具有引用的语义，效率也更高。其不足之处在于无法像数组一样精确控制存储方式，如果想在一个数据结构中保存一个具有 100个元素的序列，应该采用数组。
@@ -449,8 +600,10 @@ Slice 在 Go 程序中比数组更常见。它更灵活，并且具有引用的�
 
 可以用 slice 来写这个函数(来自
 ```
+
 sum.go
-```
+
+```text
 )：
 
     09    func sum(a []int) int {   // 返回一个整数
@@ -467,34 +620,46 @@ sum.go
 
 注意在
 ```
-sum()
-```
+
+sum\(\)
+
+```text
 的参数列表后面加 int 定义了其返回值类型（int）。
 ```
-[3]int{1,2,3}
-```
+
+\[3\]int{1,2,3}
+
+```text
 的形式是一个数据类型后面接一个大括号括起来的表达式，整个这个表达式构造出了一个值，这里是一个包含三个整数的数组。前面的
 ```
+
 &
-```
+
+```text
 表示提取这个值的地址。这个地址会被隐性的转为一个 slice 传给
 ```
-sum()
-```
+
+sum\(\)
+
+```text
 。
 
 如果想创建一个数组，但希望编译器来帮你确定数组的大小，可以用
 ```
+
 ...
-```
+
+```text
 作为数组大小：
 
     s := sum(&[...]int{1,2,3});
 
 实际使用中，除非非常在意数据结构的存储方式，否则 slice 本身 （用[]且不带
 ```
+
 &
-```
+
+```text
 ） 就足够了：
 
     s := sum([]int{1,2,3});
@@ -503,22 +668,30 @@ sum()
 
     m := map[string]int{"one":1 , "two":2}
 ```
+
 sum还第一次出现 了
-```
+
+```text
 内置函数
 ```
-len()，用于返回元素数量。
-```
+
+len\(\)，用于返回元素数量。
+
+```text
 可以用于字符串、数组、slice、map、map和channel.
 
 此外，
 ```
+
 for
-```
+
+```text
 循环中的
 ```
+
 range
-```
+
+```text
 也可以用于字符串、数组、slice、map、map和channel。例如
 
     for i := 0; i < len(a); i++ { ... }
@@ -533,16 +706,22 @@ range
 
 Go中的大多数数据类型都是值类型。对
 ```
+
 int
-```
+
+```text
 、
 ```
+
 struct
-```
+
+```text
 或数组的赋值会拷贝其内容。
 ```
-new()
-```
+
+new\(\)
+
+```text
 可以分配一个新的变量，并返回其分配的存储空间的地址。例如
 
     type T struct { a, b int }
@@ -554,8 +733,10 @@ new()
 
 Some types-maps, slices, and channels (see below)-have reference semantics. If you're holding a slice or a map and you modify its contents, other variables referencing the same underlying data will see the modification. For these three types you want to use the built-in function
 ```
-make()
-```
+
+make\(\)
+
+```text
 :
 
     m := make(map[string]int);
@@ -566,46 +747,64 @@ This statement initializes a new map ready to store entries. If you just declare
 
 it creates a
 ```
+
 nil
-```
+
+```text
 reference that cannot hold anything. To use the map, you must first initialize the reference using
 ```
-make()
-```
+
+make\(\)
+
+```text
 or by assignment from an existing map.
 
 Note that
 ```
-new(T)
-```
+
+new\(T\)
+
+```text
 returns type
 ```
-*T
-```
+
+\*T
+
+```text
 while
 ```
-make(T)
-```
+
+make\(T\)
+
+```text
 returns type
 ```
+
 T
-```
+
+```text
 . If you (mistakenly) allocate a reference object with
 ```
-new()
-```
+
+new\(\)
+
+```text
 , you receive a pointer to a nil reference, equivalent to declaring an uninitialized variable and taking its address.
 
 ## An Interlude about Constants
 
 Although integers come in lots of sizes in Go, integer constants do not. There are no constants like
 ```
+
 0LL
-```
+
+```text
 or
 ```
+
 0x0UL
-```
+
+```text
 . Instead, integer constants are evaluated as large-precision values that can overflow only when they are assigned to an integer variable with too little precision to represent the value.
 
     const hardEight = (1 << 100) >> 97  // legal
@@ -622,24 +821,32 @@ There are nuances that deserve redirection to the legalese of the language speci
 
 Conversions  only work for simple cases such as converting
 ```
+
 ints
-```
+
+```text
 of one sign or size to another, and between
 ```
+
 ints
-```
+
+```text
 and
 ```
+
 floats
-```
+
+```text
 , plus a few other simple cases. There are no automatic numeric  conversions of any kind in Go, other than that of making constants have concrete size and type when assigned to a variable.
 
 ## An  I/O Package
 
 Next we'll look at a simple package for doing file I/O with the usual sort of open/close/read/write interface. Here's the  start of
 ```
+
 file.go
-```
+
+```text
 :
 
     05    package file
@@ -656,50 +863,68 @@ file.go
 
 The first few lines declare the name of the package-
 ```
+
 file
-```
+
+```text
 -and then import two packages. The
 ```
+
 os
-```
+
+```text
 package hides the differences between various operating systems to give a consistent view of files and so on; here we're going to use its error handling utilities and reproduce the rudiments of its file I/O.
 
 The other item is the low-level, external
 ```
+
 syscall
-```
+
+```text
 package, which provides a primitive interface to the underlying operating system's calls.
 
 Next is a type definition: the
 ```
+
 type
-```
+
+```text
 keyword introduces a type declaration, in this case a data structure called
 ```
+
 File
-```
+
+```text
 . To make things a little more interesting, our
 ```
+
 File
-```
+
+```text
 includes the name of the file that the file descriptor refers to.
 
 Because
 ```
+
 File
-```
+
+```text
 starts with a capital letter, the type is available outside the package, that is, by users of the package. In Go the rule about visibility of information is simple: if a name (of a top-level type, function, method, constant or variable, or of a structure field or method) is capitalized, users of the package may see it. Otherwise, the name and hence the thing being named is visible only inside the package in which it is declared. This is more than a convention; the rule is enforced by the compiler. In Go, the term for publicly visible names is ''exported''.
 
 In the case of
 ```
+
 File
-```
+
+```text
 , all its fields are lower case and so invisible to users, but we will soon give it some exported, upper-case methods.
 
 First, though, here is a factory to create a
 ```
+
 File
-```
+
+```text
 :
 
     17    func newFile(fd int, name string) *File {
@@ -711,8 +936,10 @@ File
 
 This returns a pointer to a new
 ```
+
 File
-```
+
+```text
 structure with the file descriptor and name filled in. This code uses Go's notion of a ''composite literal'', analogous to the ones used to build maps and arrays, to construct a new heap-allocated object. We could write
 
     n := new(File);
@@ -722,14 +949,18 @@ structure with the file descriptor and name filled in. This code uses Go's notio
 
 but for simple structures like
 ```
+
 File
-```
+
+```text
 it's easier to return the address of a nonce composite literal, as is done here on line 21.
 
 We can use the factory to construct some familiar, exported variables of type
 ```
-*File
-```
+
+\*File
+
+```text
 :
 
     24    var (
@@ -740,12 +971,16 @@ We can use the factory to construct some familiar, exported variables of type
 
 The
 ```
+
 newFile
-```
+
+```text
 function was not exported because it's internal. The proper, exported factory to use is
 ```
+
 Open
-```
+
+```text
 :
 
     30    func Open(name string, mode int, perm int) (file *File, err os.Error) {
@@ -758,88 +993,128 @@ Open
 
 There are a number of new things in these few lines. First,
 ```
+
 Open
-```
+
+```text
 returns multiple values, a
 ```
+
 File
-```
+
+```text
 and an error (more about errors in a moment). We declare the multi-value return as a parenthesized list of declarations; syntactically they look just like a second parameter list. The function
 ```
+
 syscall.Open
-```
+
+```text
 also has a multi-value return, which we can grab with the multi-variable declaration on line 31; it declares
 ```
+
 r
-```
+
+```text
 and
 ```
+
 e
-```
+
+```text
 to hold the two values, both of type
 ```
+
 int
-```
+
+```text
 (although you'd have to look at the
 ```
+
 syscall
-```
+
+```text
 package to see that). Finally, line 35 returns two values: a pointer to the new
 ```
+
 File
-```
+
+```text
 and the error. If
 ```
+
 syscall.Open
-```
+
+```text
 fails, the file descriptor
 ```
+
 r
-```
+
+```text
 will be negative and
 ```
+
 NewFile
-```
+
+```text
 will return
 ```
+
 nil
-```
+
+```text
 .
 
 About those errors: The
 ```
+
 os
-```
+
+```text
 library includes a general notion of an error. It's a good idea to use its facility in your own interfaces, as we do here, for consistent error handling throughout Go code. In
 ```
+
 Open
-```
+
+```text
 we use a conversion to translate Unix's integer
 ```
+
 errno
-```
+
+```text
 value into the integer type
 ```
+
 os.Errno
-```
+
+```text
 , which implements
 ```
+
 os.Error
-```
+
+```text
 .
 
 Now that we can build
 ```
+
 Files
-```
+
+```text
 , we can write methods for them. To declare a method of a type, we define a function to have an explicit receiver of that type, placed in parentheses before the function name. Here are some methods for
 ```
-*File
-```
+
+\*File
+
+```text
 , each of which declares a receiver variable
 ```
+
 file
-```
+
+```text
 .
 
     38    func (file *File) Close() os.Error {
@@ -883,44 +1158,62 @@ file
 
 There is no implicit
 ```
+
 this
-```
+
+```text
 and the receiver variable must be used to access members of the structure. Methods are not declared within the
 ```
+
 struct
-```
+
+```text
 declaration itself. The
 ```
+
 struct
-```
+
+```text
 declaration defines only data members. In fact, methods can be created for almost any type you name, such as an integer or array, not just for
 ```
+
 structs
-```
+
+```text
 . We'll see an example with arrays later.
 
 The
 ```
+
 String
-```
+
+```text
 method is so called because of a printing convention we'll describe later.
 
 The methods use the public variable
 ```
+
 os.EINVAL
-```
+
+```text
 to return the (
 ```
+
 os.Error
-```
+
+```text
 version of the) Unix error code
 ```
+
 EINVAL
-```
+
+```text
 . The
 ```
+
 os
-```
+
+```text
 library defines a standard set of such error values.
 
 We can now use our new package:
@@ -944,12 +1237,16 @@ We can now use our new package:
 
 The ''
 ```
+
 ./
-```
+
+```text
 '' in the import of ''
 ```
+
 ./file
-```
+
+```text
 '' tells the compiler to use our own package rather than something from the directory of installed packages.
 
 Finally we can run the program:
@@ -963,16 +1260,22 @@ Finally we can run the program:
 
 Building on the
 ```
+
 file
-```
+
+```text
 package, here's a simple version of the Unix utility
 ```
-cat(1)
-```
+
+cat\(1\)
+
+```text
 ,
 ```
+
 progs/cat.go
-```
+
+```text
 :
 
     05    package main
@@ -1020,120 +1323,174 @@ progs/cat.go
 
 By now this should be easy to follow, but the
 ```
+
 switch
-```
+
+```text
 statement introduces some new features. Like a
 ```
+
 for
-```
+
+```text
 loop, an
 ```
+
 if
-```
+
+```text
 or
 ```
+
 switch
-```
+
+```text
 can include an initialization statement. The
 ```
+
 switch
-```
+
+```text
 on line 18 uses one to create variables
 ```
+
 nr
-```
+
+```text
 and
 ```
+
 er
-```
+
+```text
 to hold the return values from
 ```
-f.Read()
-```
+
+f.Read\(\)
+
+```text
 . (The
 ```
+
 if
-```
+
+```text
 on line 25 has the same idea.) The
 ```
+
 switch
-```
+
+```text
 statement is general: it evaluates the cases from top to bottom looking for the first case that matches the value; the case expressions don't need to be constants or even integers, as long as they all have the same type.
 
 Since the
 ```
+
 switch
-```
+
+```text
 value is just
 ```
+
 true
-```
+
+```text
 , we could leave it off-as is also the situation in a
 ```
+
 for
-```
+
+```text
 statement, a missing value means
 ```
+
 true
-```
+
+```text
 . In fact, such a
 ```
+
 switch
-```
+
+```text
 is a form of
 ```
+
 if-else
-```
+
+```text
 chain. While we're here, it should be mentioned that in
 ```
+
 switch
-```
+
+```text
 statements each
 ```
+
 case
-```
+
+```text
 has an implicit
 ```
+
 break
-```
+
+```text
 .
 
 Line 25 calls
 ```
-Write()
-```
+
+Write\(\)
+
+```text
 by slicing the incoming buffer, which is itself a slice. Slices provide the standard Go way to handle I/O buffers.
 
 Now let's make a variant of
 ```
+
 cat
-```
+
+```text
 that optionally does
 ```
+
 rot13
-```
+
+```text
 on its input. It's easy to do by just processing the bytes, but instead we will exploit Go's notion of an**interface**.
 
 The
 ```
-cat()
-```
+
+cat\(\)
+
+```text
 subroutine uses only two methods of
 ```
+
 f
-```
+
+```text
 :
 ```
-Read()
-```
+
+Read\(\)
+
+```text
 and
 ```
-String()
-```
+
+String\(\)
+
+```text
 , so let's start by defining an interface that has exactly those two methods. Here is code from
 ```
-progs/cat_rot13.go
-```
+
+progs/cat\_rot13.go
+
+```text
 :
 
     26    type reader interface {
@@ -1143,44 +1500,64 @@ progs/cat_rot13.go
 
 Any type that has the two methods of
 ```
+
 reader
-```
+
+```text
 -regardless of whatever other methods the type may also have-is said to**implement**the interface. Since
 ```
+
 file.File
-```
+
+```text
 implements these methods, it implements the
 ```
+
 reader
-```
+
+```text
 interface. We could tweak the
 ```
+
 cat
-```
+
+```text
 subroutine to accept a
 ```
+
 reader
-```
+
+```text
 instead of a
 ```
-*file.File
-```
+
+\*file.File
+
+```text
 and it would work just fine, but let's embellish a little first by writing a second type that implements
 ```
+
 reader
-```
+
+```text
 , one that wraps an existing
 ```
+
 reader
-```
+
+```text
 and does
 ```
+
 rot13
-```
+
+```text
 on the data. To do this, we just define the type and implement the methods and  with no other bookkeeping, we have a second implementation of the
 ```
+
 reader
-```
+
+```text
 interface.
 
     31    type rotate13 struct {
@@ -1206,8 +1583,10 @@ interface.
 
 (The
 ```
+
 rot13
-```
+
+```text
 function called on line 42 is trivial and not worth reproducing here.)
 
 To use the new feature, we define a flag:
@@ -1216,8 +1595,10 @@ To use the new feature, we define a flag:
 
 and use it from within a mostly unchanged
 ```
-cat()
-```
+
+cat\(\)
+
+```text
 function:
 
     52    func cat(r reader) {
@@ -1245,36 +1626,52 @@ function:
 
 (We could also do the wrapping in
 ```
+
 main
-```
+
+```text
 and leave
 ```
-cat()
-```
+
+cat\(\)
+
+```text
 mostly alone, except for changing the type of the argument; consider that an exercise.) Lines 56 through 58 set it all up: If the
 ```
+
 rot13
-```
+
+```text
 flag is true, wrap the
 ```
+
 reader
-```
+
+```text
 we received into a
 ```
+
 rotate13
-```
+
+```text
 and proceed. Note that the interface variables are values, not pointers: the argument is of type
 ```
+
 reader
-```
+
+```text
 , not
 ```
-*reader
-```
+
+\*reader
+
+```text
 , even though under the covers it holds a pointer to a
 ```
+
 struct
-```
+
+```text
 .
 
 Here it is in action:
@@ -1289,20 +1686,28 @@ Fans of dependency injection may take cheer from how easily interfaces allow us 
 
 Interfaces are a distinctive feature of Go. An interface is implemented by a type if the type implements all the methods declared in the interface. This means that a type may implement an arbitrary number of different interfaces. There is no type hierarchy; things can be much more**ad hoc**, as we saw with
 ```
+
 rot13
-```
+
+```text
 . The type
 ```
+
 file.File
-```
+
+```text
 implements
 ```
+
 reader
-```
+
+```text
 ; it could also implement a
 ```
+
 writer
-```
+
+```text
 , or any other interface built from its methods that fits the current situation. Consider the**empty interface**
 
     type Empty interface {}
@@ -1315,8 +1720,10 @@ Interfaces provide a simple form of polymorphism. They completely separate the d
 
 As an example, consider this simple sort algorithm taken from
 ```
+
 progs/sort.go
-```
+
+```text
 :
 
     13    func Sort(data Interface) {
@@ -1329,8 +1736,10 @@ progs/sort.go
 
 The code needs only three methods, which we wrap into sort's
 ```
+
 Interface
-```
+
+```text
 :
 
     07    type Interface interface {
@@ -1341,28 +1750,40 @@ Interface
 
 We can apply
 ```
+
 Sort
-```
+
+```text
 to any type that implements
 ```
+
 Len
+
+```text
+,
 ```
-, 
-```
+
 Less
-```
+
+```text
 , and
 ```
+
 Swap
-```
+
+```text
 . The
 ```
+
 sort
-```
+
+```text
 package includes the necessary methods to allow sorting of arrays of integers, strings, etc.; here's the code for arrays of
 ```
+
 int
-```
+
+```text
     33    type IntArray []int
 
     35    func (p IntArray) Len() int            { return len(p) }
@@ -1371,18 +1792,24 @@ int
 
 Here we see methods defined for non-
 ```
+
 struct
-```
+
+```text
 types. You can define methods for any type you define and name in your package.
 
 And now a routine to test it out, from
 ```
+
 progs/sortmain.go
-```
+
+```text
 . This uses a function in the
 ```
+
 sort
-```
+
+```text
 package, omitted here for brevity, to test that the result is sorted.
 
     12    func ints() {
@@ -1416,62 +1843,88 @@ The examples of formatted printing so far have been modest. In this section we'l
 
 We've seen simple uses of the package
 ```
+
 fmt
-```
+
+```text
 , which implements
 ```
+
 Printf
+
+```text
+,
 ```
-, 
-```
+
 Fprintf
-```
+
+```text
 , and so on. Within the
 ```
+
 fmt
-```
+
+```text
 package,
 ```
+
 Printf
-```
+
+```text
 is declared with this signature:
 
     Printf(format string, v ...) (n int, errno os.Error)
 
-That 
+That
 ```
+
 ...
-```
+
+```text
 represents the variadic argument list that in C would be handled using the
 ```
+
 stdarg.h
-```
+
+```text
 macros but in Go is passed using an empty interface variable (
 ```
+
 interface {}
-```
+
+```text
 ) and then unpacked using the reflection library. It's off topic here but the use of reflection helps explain some of the nice properties of Go's
 ```
+
 Printf
-```
+
+```text
 , due to the ability of
 ```
+
 Printf
-```
+
+```text
 to discover the type of its arguments dynamically.
 
 For example, in C each format must correspond to the type of its argument. It's easier in many cases in Go. Instead of
 ```
+
 %llud
-```
+
+```text
 you can just say
 ```
+
 %d
-```
+
+```text
 ;
 ```
+
 Printf
-```
+
+```text
 knows the size and signedness of the integer and can do the right thing for you. The snippet
 
     10    var u64 uint64 = 1<<64-1;
@@ -1483,8 +1936,10 @@ prints
 
 In fact, if you're lazy the format
 ```
+
 %v
-```
+
+```text
 will print, in a simple appropriate  style, any value, even an array or structure. The output of
 
     14    type T struct { a int; b string };
@@ -1498,32 +1953,46 @@ is
 
 You can drop the formatting altogether if you use
 ```
+
 Print
-```
+
+```text
 or
 ```
+
 Println
-```
+
+```text
 instead of
 ```
+
 Printf
-```
+
+```text
 . Those routines do fully automatic formatting. The
 ```
+
 Print
-```
+
+```text
 function just prints its elements out using the equivalent of
 ```
+
 %v
-```
+
+```text
 while
 ```
+
 Println
-```
+
+```text
 inserts spaces between arguments and adds a newline. The output of each of these two lines is identical to that of the
 ```
+
 Printf
-```
+
+```text
 call above.
 
     18    fmt.Print(u64, " ", t, " ", a, "n");
@@ -1531,16 +2000,22 @@ call above.
 
 If you have your own type you'd like
 ```
+
 Printf
-```
+
+```text
 or
 ```
+
 Print
-```
+
+```text
 to format, just give it a
 ```
-String()
-```
+
+String\(\)
+
+```text
 method that returns a string. The print routines will examine the value to inquire whether it implements the method and if so, use it rather than some other formatting. Here's a simple example.
 
     09    type testType struct {
@@ -1559,54 +2034,74 @@ method that returns a string. The print routines will examine the value to inqui
 
 Since
 ```
-*testType
-```
+
+\*testType
+
+```text
 has a
 ```
-String()
-```
+
+String\(\)
+
+```text
 method, the default formatter for that type will use it and produce the output
 
     77 Sunset Strip
 
 Observe that the
 ```
-String()
-```
+
+String\(\)
+
+```text
 method calls
 ```
+
 Sprint
-```
+
+```text
 (the obvious Go variant that returns a string) to do its formatting; special formatters can use the
 ```
+
 fmt
-```
+
+```text
 library recursively.
 
 Another feature of
 ```
+
 Printf
-```
+
+```text
 is that the format
 ```
+
 %T
-```
+
+```text
 will print a string representation of the type of a value, which can be handy when debugging polymorphic code.
 
 It's possible to write full custom print formats with flags and precisions and such, but that's getting a little off the main thread so we'll leave it as an exploration exercise.
 
 You might ask, though, how
 ```
+
 Printf
-```
+
+```text
 can tell whether a type implements the
 ```
-String()
-```
+
+String\(\)
+
+```text
 method. Actually what it does is ask if the value can be converted to an interface variable that implements the method. Schematically, given a value
 ```
+
 v
-```
+
+```text
 , it does this:
 
     type Stringer interface {
@@ -1622,64 +2117,92 @@ v
 
 The code uses a ``type assertion'' (
 ```
-v.(Stringer)
-```
+
+v.\(Stringer\)
+
+```text
 ) to test if the value stored in
 ```
+
 v
-```
+
+```text
 satisfies the
 ```
+
 Stringer
-```
+
+```text
 interface; if it does,
 ```
+
 s
-```
+
+```text
 will become an interface variable implementing the method and
 ```
+
 ok
-```
+
+```text
 will be
 ```
+
 true
-```
+
+```text
 . We then use the interface variable to call the method. (The ''comma, ok'' pattern is a Go idiom used to test the success of operations such as type conversion, map update, communications, and so on, although this is the only appearance in this tutorial.) If the value does not satisfy the interface,
 ```
+
 ok
-```
+
+```text
 will be false.
 
 In this snippet the name
 ```
+
 Stringer
-```
+
+```text
 follows the convention that we add ''[e]r'' to interfaces describing simple method sets like this.
 
 One last wrinkle. To complete the suite, besides
 ```
+
 Printf
-```
+
+```text
 etc. and
 ```
+
 Sprintf
-```
+
+```text
 etc., there are also
 ```
+
 Fprintf
-```
+
+```text
 etc. Unlike in C,
 ```
+
 Fprintf
-```
+
+```text
 's first argument is not a file. Instead, it is a variable of type
 ```
+
 io.Writer
-```
+
+```text
 , which is an interface type defined in the
 ```
+
 io
-```
+
+```text
 library:
 
     type Writer interface {
@@ -1688,24 +2211,34 @@ library:
 
 (This interface is another conventional name, this time for
 ```
+
 Write
-```
+
+```text
 ; there are also
 ```
+
 io.Reader
-```
+
+```text
 ,
 ```
+
 io.ReadWriter
-```
+
+```text
 , and so on.) Thus you can call
 ```
+
 Fprintf
-```
+
+```text
 on any type that implements a standard
 ```
-Write()
-```
+
+Write\(\)
+
+```text
 method, not just files but also network channels, buffers, whatever you want.
 
 ## Prime numbers
@@ -1718,14 +2251,18 @@ Here's a flow diagram; each box represents a filter element whose creation is tr
 
 To create a stream of integers, we use a Go**channel**, which, borrowing from CSP's descendants, represents a communications channel that can connect two concurrent computations. In Go, channel variables are references to a run-time object that coordinates the communication; as with maps and slices, use
 ```
+
 make
-```
+
+```text
 to create a new channel.
 
 Here is the first function in
 ```
+
 progs/sieve.go
-```
+
+```text
 :
 
     09    // Send the sequence 2, 3, 4, ... to channel 'ch'.
@@ -1735,32 +2272,44 @@ progs/sieve.go
     13        }
     14    }
 
-The 
+The
 ```
+
 generate
-```
+
+```text
 function sends the sequence 2, 3, 4, 5, ... to its argument channel,
 ```
+
 ch
-```
+
+```text
 , using the binary communications operator
 ```
-<-
-```
+
+&lt;-
+
+```text
 . Channel operations block, so if there's no recipient for the value on
 ```
+
 ch
-```
+
+```text
 , the send operation will wait until one becomes available.
 
 The
 ```
+
 filter
-```
+
+```text
 function has three arguments: an input channel, an output channel, and a prime number. It copies values from the input to the output, discarding anything divisible by the prime. The unary communications operator
 ```
-<-
-```
+
+&lt;-
+
+```text
 (receive) retrieves the next value on the channel.
 
     16    // Copy the values from channel 'in' to channel 'out',
@@ -1776,8 +2325,10 @@ function has three arguments: an input channel, an output channel, and a prime n
 
 The generator and filters execute concurrently. Go has its own model of process/threads/light-weight processes/coroutines, so to avoid notational confusion we call concurrently executing computations in Go**goroutines**. To start a goroutine, invoke the function, prefixing the call with the keyword
 ```
+
 go
-```
+
+```text
 ; this starts the function running in parallel with the current computation but in the same address space:
 
     go sum(hugeArray); // calculate sum in the background
@@ -1805,26 +2356,36 @@ Back to our prime sieve. Here's how the sieve pipeline is stitched together:
 
 Line 29 creates the initial channel to pass to
 ```
+
 generate
-```
+
+```text
 , which it then starts up. As each prime pops out of the channel, a new
 ```
+
 filter
-```
+
+```text
 is added to the pipeline and**its**output becomes the new value of
 ```
+
 ch
-```
+
+```text
 .
 
 The sieve program can be tweaked to use a pattern common in this style of programming. Here is a variant version of
 ```
+
 generate
-```
+
+```text
 , from
 ```
+
 progs/sieve1.go
-```
+
+```text
 :
 
     10    func generate() chan int {
@@ -1841,18 +2402,24 @@ This version does all the setup internally. It creates the output channel, launc
 
 The function literal notation (lines 12-16) allows us to construct an anonymous function and invoke it on the spot. Notice that the local variable
 ```
+
 ch
-```
+
+```text
 is available to the function literal and lives on even after
 ```
+
 generate
-```
+
+```text
 returns.
 
 The same change can be made to
 ```
+
 filter
-```
+
+```text
 :
 
     21    func filter(in chan int, prime int) chan int {
@@ -1867,10 +2434,12 @@ filter
     30        return out;
     31    }
 
-The 
+The
 ```
+
 sieve
-```
+
+```text
 function's main loop becomes simpler and clearer as a result, and while we're at it let's turn it into a factory too:
 
     33    func sieve() chan int {
@@ -1888,8 +2457,10 @@ function's main loop becomes simpler and clearer as a result, and while we're at
 
 Now
 ```
+
 main
-```
+
+```text
 's interface to the prime sieve is a channel of primes:
 
     46    func main() {
@@ -1903,8 +2474,10 @@ main
 
 With channels, it's possible to serve multiple independent client goroutines without writing an explicit multiplexer. The trick is to send the server a channel in the message, which it will then use to reply to the original sender. A realistic client-server program is a lot of code, so here is a very simple substitute to illustrate the idea. It starts by defining a
 ```
+
 request
-```
+
+```text
 type, which embeds a channel that will be used for the reply.
 
     09    type request struct {
@@ -1923,14 +2496,18 @@ The server will be trivial: it will do simple binary operations on integers. Her
 
 Line 18 defines the name
 ```
+
 binOp
-```
+
+```text
 to be a function taking two integers and returning a third.
 
 The
 ```
+
 server
-```
+
+```text
 routine loops forever, receiving requests and, to avoid blocking due to a long-running operation, starting a goroutine to do the actual work.
 
     21    func server(op binOp, service chan *request) {
@@ -1950,8 +2527,10 @@ We construct a server in a familiar way, starting it and returning a channel con
 
 Here's a simple test. It starts a server with an addition operator and sends out
 ```
+
 N
-```
+
+```text
 requests without waiting for the replies. Only after all the requests are sent does it check the results.
 
     34    func main() {
@@ -1975,12 +2554,16 @@ requests without waiting for the replies. Only after all the requests are sent d
 
 One annoyance with this program is that it doesn't shut down the server cleanly; when
 ```
+
 main
-```
+
+```text
 returns there are a number of lingering goroutines blocked on communication. To solve this, we can provide a second,
 ```
+
 quit
-```
+
+```text
 channel to the server:
 
     32    func startServer(op binOp) (service chan *request, quit chan bool) {
@@ -1992,8 +2575,10 @@ channel to the server:
 
 It passes the quit channel to the
 ```
+
 server
-```
+
+```text
 function, which uses it like this:
 
     21    func server(op binOp, service chan *request, quit chan bool) {
@@ -2007,29 +2592,38 @@ function, which uses it like this:
     29        }
     30    }
 
-Inside 
+Inside
 ```
+
 server
-```
+
+```text
 , the
 ```
+
 select
-```
+
+```text
 statement chooses which of the multiple communications listed by its cases can proceed. If all are blocked, it waits until one can proceed; if multiple can proceed, it chooses one at random. In this instance, the
 ```
+
 select
-```
+
+```text
 allows the server to honor requests until it receives a quit message, at which point it returns, terminating its execution.
 
 All that's left is to strobe the
 ```
-quit
-```
-channel at the end of main:
 
-    42        adder, quit := startServer(func(a, b int) int { return a + b });
-    ...
-    55        quit <- true;
+quit
+
+\`\`\` channel at the end of main:
+
+```text
+42        adder, quit := startServer(func(a, b int) int { return a + b });
+...
+55        quit <- true;
+```
 
 关于Go编程和并发程序设计还有许多其它的内容，但这份快速入门教程应该已经给你提供了一点基础知识。
 

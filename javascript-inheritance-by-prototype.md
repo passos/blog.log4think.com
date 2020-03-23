@@ -2,15 +2,18 @@
 title: JavaScript 中几种不同的基于 prototype 继承方式的区别
 date: '2016-12-13 19:24:52 +0800'
 ---
-#JavaScript 中几种不同的基于 prototype 继承方式的区别
 
-## 普通属性的继承
+# 2016-12-13 JavaScript 中几种不同的基于 prototype 继承方式的区别
 
-### 第一种方式
+## JavaScript 中几种不同的基于 prototype 继承方式的区别
+
+### 普通属性的继承
+
+#### 第一种方式
 
 来自于 [MDN 对象模型的细节](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Details_of_the_Object_Model)
 
-```
+```text
 function Employee1 (name, dept) {
     console.log('Employee constructor')
     this.name = name || "";
@@ -44,12 +47,11 @@ console.log(WorkerBee1.prototype.isPrototypeOf(e1))
 console.log(e1)
 ```
 
-
-### 第二种方式
+#### 第二种方式
 
 来自于 YUI 的实现，利用中间对象传递 prototype
 
-```
+```text
 function extend(Child, Parent) {
     var F = function () { };
     F.prototype = Parent.prototype;
@@ -93,13 +95,13 @@ console.log(e2)
 
 可以看到，区别主要在于，直接 `Child.prototype = new Parent()` 会把定义在 Parent 里面的方法也带到 prototype 里面去。另外，这种方式并没有执行父类的构造函数。
 
-## 对于定义在 prototype 里面的方法呢
+### 对于定义在 prototype 里面的方法呢
 
 下面对上面的方法定义进行一点改进，把方法定义在 prototype 里，类似正常的 OO 编程中在类里面定义方法。
 
-### 第一种方式改进
+#### 第一种方式改进
 
-```
+```text
 function Employee3 (name, dept) {
     console.log('Employee constructor')
     this.name = name || "";
@@ -133,9 +135,9 @@ console.log(WorkerBee3.prototype.isPrototypeOf(e3))
 console.log(e3)
 ```
 
-### 第二种方式的改进
+#### 第二种方式的改进
 
-```
+```text
 function extend(Child, Parent) {
     var F = function () { };
     F.prototype = Parent.prototype;
@@ -180,13 +182,13 @@ console.log(e4)
 
 注意观察 `constructor` 和 `__proto__` 属性。
 
-# 要执行所有构造函数
+## 要执行所有构造函数
 
 上述第二种方法，都没有执行父类的构造函数，也就没有真正的继承父类的初始化数据。为了弥补这一点，如下两种写法都可以达到目的。
 
-## 利用 `super` 变量
+### 利用 `super` 变量
 
-```
+```text
 function extend(Child, Parent) {
     var F = function () { };
     F.prototype = Parent.prototype;
@@ -236,9 +238,9 @@ console.log(WorkerBee5.prototype.isPrototypeOf(e5))
 console.log(e5)
 ```
 
-## 类似，但是用 `Parent.apply` 方法
+### 类似，但是用 `Parent.apply` 方法
 
-```
+```text
 function extend(Child, Parent) {
     var F = function () { };
     F.prototype = Parent.prototype;
@@ -280,3 +282,4 @@ console.log(Employee6.prototype.isPrototypeOf(e6))
 console.log(WorkerBee6.prototype.isPrototypeOf(e6))
 console.log(e6)
 ```
+

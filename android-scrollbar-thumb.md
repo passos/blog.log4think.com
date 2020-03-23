@@ -2,10 +2,14 @@
 title: Android的滚动条实现细节
 date: '2012-09-22 13:37:14 +0800'
 ---
-在Android的UI系统中，每个View都有一个ScrollabilityCache的单例对象。该对象定义在View.java中，用于保存ScrollBar的相关实例和属性(ScrollBar实际上是一个ScrollBarDrawable对象)，并且实现了淡入淡出动画效果的线程代码。这些会在该View的所有ScrollBar中共用。
+
+# 2012-09-22  Android的滚动条实现细节
+
+在Android的UI系统中，每个View都有一个ScrollabilityCache的单例对象。该对象定义在View.java中，用于保存ScrollBar的相关实例和属性\(ScrollBar实际上是一个ScrollBarDrawable对象\)，并且实现了淡入淡出动画效果的线程代码。这些会在该View的所有ScrollBar中共用。
 
 以垂直滚动条为例，画出滚动条的过程大致是:
-```
+
+```text
 1. View::Draw
 2. View::onDrawScrollBars
 scrollBar.setParameters(computeVerticalScrollRange(),
@@ -42,3 +46,4 @@ if (drawThumb) {
     drawThumb(canvas, r, offset, length, vertical);
 }
 ```
+

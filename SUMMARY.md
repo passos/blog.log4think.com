@@ -33,7 +33,7 @@
 * [2012-02-05  hostname自动变成bogon的问题](bogon.md)
 * [2011-07-09  代码段速记 gist.github.com](code-snippets.md)
 * [2011-07-08  A perl Data.Dumper clone for Python](data-dumper-for-python.md)
-* [2011-06-22  魔兽世界私服Trinity，从源码开始](setup-wow-private-server.md)
+* [2011-06-22  魔兽世界私服Trinity，从源码开始](setup_wow_private_server.md)
 * [2011-06-13  魔兽世界3.3.5 13930登录数据包分析](wow-3-3-513930-login-packets.md)
 * [2011-06-13  魔兽世界 3.3.5 13930 Trinity 认证补丁](wow-3-3-5-13930-auth-patch.md)
 * [2011-05-20  统一业务模型\(UBM\) in ERP5](ubm-in-erp5.md)

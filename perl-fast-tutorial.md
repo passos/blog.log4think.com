@@ -2,604 +2,258 @@
 title: Perl无废话入门指南
 date: '2005-09-12 18:30:07 +0800'
 ---
+
+# 2005-09-12  Perl无废话入门指南
+
 最近接到一个任务是这样的，一台Solaris服务器上需要运行一个脚本，每天统计MySQL数据库中的数据并生成报表。本来这是一个可以就事论事的小项目，但是为了以后的灵活和可扩展性，我设计了一个使用XML做统计模版配置的方案。由于在Bash下不太好实现XML的访问，因此我考虑用Perl来实现这个脚本。
 
 Perl是一个强大的脚本语言，本来是设计应用在文本处理方面的，但是后来发展的越来越强大，已经可以处理网络、图形、系统、文件等等各个方面的内容。Perl本身内置了丰富的操作符和函数，外部也有多年积累下来的大量模块。但是不知道什么原因在国内好像很少有人用。关于Perl的历史我就不多说了，有兴趣可以上网查一下。有一点要说的是，目前Perl最新的版本是5.8.6，而Perl6虽然已经设计很久了但是由于自举问题目前还没有一个可用的版本。为了解决这个问题，台湾的唐宗汉发起的Pugs项目正在快速的实施中，可能很快就能有结果了，有兴趣的朋友可以多多关注一下，也许还可以为开源世界做点贡献。
 
 虽然很早以前就了解过Perl，但是从来就没有实际的用它做过项目，因此这次的实现是一个边学边做的过程。作为一个程序员，学习一种新的语言总会有一点惯性思维，加之Perl在语法上与C语言比较类似。因此我想在这片文章中主要以C为背景做一个比较。这种比较不是比较语言上的优劣，而是说明同样的功能如何在Perl中实现以及之间的区别。限于篇幅，具体的技术实现的细节我就不在这里多说了，你可以在末尾的资源一节中找到很多相关的文章。如果你没有接触过Perl，我想你可能更希望看到学习Perl的过程中可能会遇到的一些问题以及解决方法。
 
-## 工欲善其事，必先利其器 ##
+## 工欲善其事，必先利其器 \#\#
 
 要写代码，首先至少得有一个编辑器。Perl是跨平台的一种解释型语言，可以在Unix/Linux/Windows/Mac等平台上运行。具体对应平台上的编辑器，最简单的方案是Unix下用vi，Windows下用UltraEdit。当然也有商业化的IDE，不过我尝试了一下发现并不是那么的好用，因此我在Windows平台上以UltraEdit作为编辑环境，完成后迁移到Solaris平台上。
 
 关于环境的搭建，有这样几个需要注意的地方：
 
-1、  Windows平台下对应的是ActivePerl，可以免费下载。
+1、 Windows平台下对应的是ActivePerl，可以免费下载。
 
-2、  去UE的网站上下载Perl的AutoComp文件，可以实现自动完成功能。
+2、 去UE的网站上下载Perl的AutoComp文件，可以实现自动完成功能。
 
-3、  下载Perl对应的语法加亮的Tag文件并加入到UE中，可以更块的发现拼写错误。
+3、 下载Perl对应的语法加亮的Tag文件并加入到UE中，可以更块的发现拼写错误。
 
-4、  在UE设置一个快捷工具，命令行为
-```
+4、 在UE设置一个快捷工具，命令行为
+
+```text
 C:\Perl\bin\perl.exe "%F"（捕获输出）
 ```
+
 ，可以实现快速运行并显示结果。
 
-5、  如果你不喜欢UE，那么我推荐Vim
+5、 如果你不喜欢UE，那么我推荐Vim
 
-## 巧妇难为无米之炊 ##
+## 巧妇难为无米之炊 \#\#
 
 起始从某种角度来说，程序员和厨子是一样的。要做出一桌大餐来，首先得看看手上有什么原料，然后才能琢磨一下用这些东西能做出什么好吃的来。或者说想做什么东西，得先备好料才行。
 
-看看我们现在都有什么：一个编辑器，一个Perl的开发环境，还有一个聪明的脑袋和满肚子的智慧。这个任务中，要处理命令行参数、访问MySQL数据库(SQL)、读写XML的配置文件以及输出一个固定格式的报表文件。
+看看我们现在都有什么：一个编辑器，一个Perl的开发环境，还有一个聪明的脑袋和满肚子的智慧。这个任务中，要处理命令行参数、访问MySQL数据库\(SQL\)、读写XML的配置文件以及输出一个固定格式的报表文件。
 
 好了，去查查资料，看看访问数据库和读写XML都需要什么东西。正如同C语言本身带了很多标准函数库一样，Perl本身也有函数库，并把这些函数库称为Module（模块）。查了一下资料，发现要访问MySQL数据库需要DBI和DBD::MySQL两个模块，那么去哪里找这些模块呢。这里给大家介绍一个Perl的Module集散地 www.cpan.org，这里包含了八千多个Module，可以从这里下载到几乎各种各样的Module。可以手工下载后安装，也可以使用工具来自动安装。在Windows下是可以使用ppm进行自动安装，例如DBD的安装过程如下：
 
-    C:\>ppm
-    ...
-    ppm> search DBI
-    Searching in Active Repositories
-    ... 一大堆与DBI相关的包的列表，其中就包括DBI这个包
-    ppm> install DBI
-    ...
-    ppm> install DBD::mysql 如果知道模块的名字也可以直接安装
-    ...
-    ppm> quit
+```text
+C:\>ppm
+...
+ppm> search DBI
+Searching in Active Repositories
+... 一大堆与DBI相关的包的列表，其中就包括DBI这个包
+ppm> install DBI
+...
+ppm> install DBD::mysql 如果知道模块的名字也可以直接安装
+...
+ppm> quit
+```
 
 如此就安装完成了。附带说一下，Linux下没有ppm，但是有类似的方式。输入命令行
 
-    perl -MCPAN -e shell
+```text
+perl -MCPAN -e shell
+```
 
 然后
-```
+
+```text
 install DBI; install DBD-mysql
 ```
+
 ，和上面的操作几乎是一样的。
 
-提示：如果是在linux下安装DBD::Mysql模块，需要把mysql的bin目录包含在环境变量PATH中，否则会提示找不到mysql_config文件。mysql一般是安装在
-```
+提示：如果是在linux下安装DBD::Mysql模块，需要把mysql的bin目录包含在环境变量PATH中，否则会提示找不到mysql\_config文件。mysql一般是安装在
+
+```text
 /usr/local/mysql
 ```
+
 下，因此可以通过执行命令行
-```
+
+```text
 PATH=$PATH:/usr/local/bin/mysql/bin
 ```
+
 来将此路径加入到环境变量中。
 
 访问XML有几种包可以选择：使用DOM和Simple模块。Simple模块是把XML用Perl的数组方式表示，而DOM是W3C维护的一个基于树的XML文档标准。具体用哪种就看个人的需要了。我使用的是DOM，因此要安装XML-DOM包，方法同上。
 
-## 芝麻开门 ##
+## 芝麻开门 \#\#
 
-说起编程语言，简单的来说无非就是这样几个必不可少的基本元素：变量、数据、表达式、流程控制语句（包括条件、分支、循环)、函数、对象。具体到语言上，大部分的内容只是表达的形式不同而已。而Perl与C又有什么区别呢？
+说起编程语言，简单的来说无非就是这样几个必不可少的基本元素：变量、数据、表达式、流程控制语句（包括条件、分支、循环\)、函数、对象。具体到语言上，大部分的内容只是表达的形式不同而已。而Perl与C又有什么区别呢？
 
 首先要知道，Perl是一种脚本语言。所谓的脚本，就是没有主函数，从最开始一行一行的按照顺序解释执行（老版Basic不也是如此吗）。因此，尽管把你的思路转化为流程用Perl表达出来吧。
 
 其次，Perl的设计中参考了很多语言的长处，并避免了设计上的缺陷。因此Perl的很多语法你可能都会觉得似曾相识。我把Perl的语法总结了一下，和C语言做了一个简单的对比表格。表格左右两边的语句是C和Perl对应表达同一个功能各自的不同方式。如果读者有Ｃ语言的经验，相信看到这个对比可以很快的上手吧？
 
-<TABLE border=0 width="100%">
-<THEAD>
-	<TH width="10%">语法元素</TH>
-	<TH width="20%">C</TH>
-	<TH width="20%">Perl</TH>
-	<TH width="50%">Perl语法说明</TH>
-</THEAD>
-
-<TBODY>
-<TR>
-	<TD>注释</TD>
-	<TD>
-```
-/* comments */
-```
-</TD>
-	<TD>
-```
-# comments 
-```
-</TD>
-	<TD>只支持单行注释</TD>
-</TR>
-
-<TR>
-	<TD>变量</TD>
-	<TD>
-```
-int a, b, c;
-char c = 'A';
-int x[10];
-	
-```
-</TD>
-	<TD>
-```
-my ($a, $b, $c);
-my $c='A';
-my @x;
-my %h;
-	
-```
-</TD>
-	<TD>
-	声明使用
-```
-my
-```
-标示 <br/>
-	表示值的变量以
-```
-$
-```
-开头，表示数组的变量以
-```
-@
-```
-开头，表示哈希表的变量以
-```
-%
-```
-开头 <br/>
-	声明可以省略(不建议)
-	</TD>
-</TR>
-
-<TR>
-	<TD>字符串</TD>
-	<TD>
-```
-char* h1 = "hello\n";
-char* h2 = "hello\\n";
-	
-```
-</TD>
-	<TD>
-```
-$h1 = "hello\n";
-$h2 = 'hello\n';
-	
-```
-</TD>
-	<TD>双引号解释内部的\n，而单引号则不解释</TD>
-</TR>
-
-<TR>
-	<TD>一维数组</TD>
-	<TD>
-```
-int arr[10];
-arr[0] = 0;
-for(i = 0; i < 10; i++) {
-	arr[i] = i;
-}
-	
-```
-</TD>
-	<TD>
-```
-my @arr = (1, 2, 3, 4, 5);
-$arr[0] = 0;
-for my $i (1..10) {
-	$arr[$i] = $i;
-}
-for my $a (@arr) {
-	print $a;
-}
-@arr[3..5] = (3..5);
-	
-```
-</TD>
-	<TD>
-	数组声明以
-```
-@
-```
-标示 <br/>
-	动态数组，不需要指定大小 <br/>
-	数组下标从０开始 <br/>
-	访问数组元素值的时候，要以$开头表示访问的是数值 <br/>
-	[3..5]表示数组中下标为3到5之间的元素组成的数组 <br/>
-	数组之间可以直接赋值 <br/>
-	for循环内必须使用{}不可省略，即使只有一条语句
-	</TD>
-</TR>
-
-<TR>
-	<TD>多维数组</TD>
-	<TD>
-```
-int arr[10][10];
-arr[0][1] = 9;
-	
-```
-</TD>
-	<TD>
-```
-my @arr = (1, 2, 3);
-$arr[0] = [7, 8, 9];
-print $arr[0]->[1]; // 8
-	
-```
-</TD>
-	<TD>Perl不直接支持多维数组，但可以以数组引用的方式间接支持。数组引用以[]初始化，用->操作符访问引用实例。例如arr[0]的内容就是一个数组的引用。</TD>
-</TR>
-
-<TR>
-	<TD>指针</TD>
-	<TD>
-```
-char c;
-int* x = &c;
-c = 'a';
-printf( *x );
-	
-```
-</TD>
-	<TD>
-```
-my $c;
-my $x = \$c;
-$c = 'a';
-print $x;
-	
-```
-</TD>
-	<TD>
-```
-\
-```
-和C中的
-```
-&
-```
-类似，意思是取引用</TD>
-</TR>
-
-<TR>
-	<TD>函数指针</TD>
-	<TD>
-```
-void hello() {
-    printf("Hello\n");
-}
-void (*hi)()=hello;
-(*p)();
-	
-```
-</TD>
-	<TD>
-```
-sub hello{
-    print "Hello\n";
-}
-my $hi = *hello;
-&$hi;
-	
-```
-</TD>
-	<TD>
-	
-```
-&
-```
-表示调用函数 <br/>
-	
-```
-*
-```
-取函数地址 <br/>
-	不必用括号把参数括起来 <br/>
-	调用时的括号也是可选的 <br/>
-	</TD>
-</TR>
-
-<TR>
-	<TD>条件语句</TD>
-	<TD>
-```
-if (x > 0)
-    x = 0;
-else
-    x = 1;
-x > 0 ? x = 0 : x = 1;
-	
-```
-</TD>
-	<TD>
-```
-if ($x > 0) {
-    $x = 0;
-} else {
-    $x = 1;
-}
-$x = 0 if $x > 0;
-$x = 0 unless $x <= 0;
-$x > 0 ? $x = 0 : $x = 1;
-	
-```
-</TD>
-	<TD>
-
-- 基本与C大同小异
-- if 结构可以反转，意义不变，注意前句没有分号
-- unless是if的反义词。顾名思义, unless是"除非"的意思。这里的四个表达方式是等价的
-- 注意第一种方式中，条件部分的圆括号和语句部分的花括号是不可省略
-
-	</TD>
-</TR>
-
-<TR>
-	<TD>循环语句</TD>
-	<TD>
-```
-for (int i = 0; i < n; i++ )
-while ( true ) { ... };
-do { ... } while ( true );
-	
-```
-</TD>
-	<TD>
-```
-for (@arry) { print $_; }
-for my $key(@ary) { ... }
-for my $count (1..10) { ... }
-while (true) { ... }
-do { ... } while (true);
-	
-```
-</TD>
-	<TD>
-
-- for/while的语法都和C类似
-- for关键字也可以用foreach，意义不变
-
-	</TD>
-</TR>
-
-<TR>
-	<TD>函数</TD>
-	<TD>
-```
-int max(int x, int y) {
-    return x > y ? x : y;
-}
-int n = max(1, 2);
-	
-```
-</TD>
-	<TD>
-```
-sub max
-{
-    my ($x, $y) = @_;
-    return $x > $y ? $x : $y;
-}
-my $n = max(1, 2)
-	
-```
-</TD>
-	<TD>
-
-- 注意下划线
-```
-_
-```
-也是一个合法的变量名。而
-```
-@_
-```
-是Perl内置的数组变量，值为当前函数的参数列表
-- 
-```
-my ($x, $y)
-```
-`　表示声明了一个有两个元素的数组，并将两个元素映射到 $x 和 $y 上
-- 
-```
-($x, $y) = @_;
-```
-则表示两个数组之间的复制，@_中对应的元素的值就赋值给了 $x 和 $y .这是一个简便的写法，也可以这样写 
-```
-my $x = $_[0]; my $y = $_[1];
-```
-- return是可选的，默认返回最后一个表达式的值
-
-	</TD>
-</TR>
-
-<TR>
-	<TD>语法约束</TD>
-	<TD>
-```
-- 编译时打开编译器所有的警告选项
-- 使用lint工具
-
-	
-```
-</TD>
-	<TD colSpan=2>
-
-- 
-```
-perl -w myprogram.pl
-```
- 打开运行警告开关，如果运行时Perl检查到了可能的错误，会显示警告信息，否则它默认是什么也不提示继续执行
-- 
-```
-#!/usr/bin/perl -w
-```
- 在代码文件第一行中加入-w选项开关
-- 
-```
-use strict;
-```
- 使用严格语法约束
-- 
-```
-use warning;
-```
- 启用警告
-
-	</TD>
-
-</TR>
-
-<TR>
-	<TD>运行</TD>
-	<TD>编译后直接执行</TD>
-	<TD colSpan=2>
-
-- 
-```
-perl myprogram.pl
-```
-- Unix下在代码第一行加入
-```
-#!/usr/bin/perl
-```
-，然后给文件加上可执行属性 
-```
-chmod +x myprogram.pl
-```
-，之后就可以用
-```
-./myprogram.pl
-```
-命令来运行
-- Windows下，安装ActivePerl后，将.pl后缀的文件和perl的解释程序关联起来，因此直接双击文件图标就可以运行
-
-	</TD>
-</TR>
-
-</TBODY>
-</TABLE>
+| 语法元素 | C | Perl | Perl语法说明 |
+| :--- | :--- | :--- | :--- |
+| 注释 |  \`\`\` /\* comments \*/ \`\`\` |  \`\`\` \# comments \`\`\` | 只支持单行注释 |
+| 变量 |  \`\`\` int a, b, c; char c = 'A'; int x\[10\]; \`\`\` |  \`\`\` my \($a, $b, $c\); my $c='A'; my @x; my %h; \`\`\` |  声明使用 \`\`\` my \`\`\` 标示  表示值的变量以 \`\`\` $ \`\`\` 开头，表示数组的变量以 \`\`\` @ \`\`\` 开头，表示哈希表的变量以 \`\`\` % \`\`\` 开头  声明可以省略\(不建议\) |
+| 字符串 |  \`\`\` char\* h1 = "hello\n"; char\* h2 = "hello\\n"; \`\`\` |  \`\`\` $h1 = "hello\n"; $h2 = 'hello\n'; \`\`\` | 双引号解释内部的\n，而单引号则不解释 |
+| 一维数组 |  \`\`\` int arr\[10\]; arr\[0\] = 0; for\(i = 0; i |  |  |
+| 多维数组 |  \`\`\` int arr\[10\]\[10\]; arr\[0\]\[1\] = 9; \`\`\` |  \`\`\` my @arr = \(1, 2, 3\); $arr\[0\] = \[7, 8, 9\]; print $arr\[0\]-&gt;\[1\]; // 8 \`\`\` | Perl不直接支持多维数组，但可以以数组引用的方式间接支持。数组引用以\[\]初始化，用-&gt;操作符访问引用实例。例如arr\[0\]的内容就是一个数组的引用。 |
+| 指针 |  \`\`\` char c; int\* x = &c; c = 'a'; printf\( \*x \); \`\`\` |  \`\`\` my $c; my $x = \$c; $c = 'a'; print $x; \`\`\` |  \`\`\` \ \`\`\` 和C中的 \`\`\` & \`\`\` 类似，意思是取引用 |
+| 函数指针 |  \`\`\` void hello\(\) { printf\("Hello\n"\); } void \(\*hi\)\(\)=hello; \(\*p\)\(\); \`\`\` |  \`\`\` sub hello{ print "Hello\n"; } my $hi = \*hello; &$hi; \`\`\` |  \`\`\` & \`\`\` 表示调用函数  \`\`\` \* \`\`\` 取函数地址  不必用括号把参数括起来  调用时的括号也是可选的  |
+| 条件语句 |  \`\`\` if \(x &gt; 0\) x = 0; else x = 1; x &gt; 0 ? x = 0 : x = 1; \`\`\` |  \`\`\` if \($x &gt; 0\) { $x = 0; } else { $x = 1; } $x = 0 if $x &gt; 0; $x = 0 unless $x 0 ? $x = 0 : $x = 1; \`\`\` |  - 基本与C大同小异 - if 结构可以反转，意义不变，注意前句没有分号 - unless是if的反义词。顾名思义, unless是"除非"的意思。这里的四个表达方式是等价的 - 注意第一种方式中，条件部分的圆括号和语句部分的花括号是不可省略 |
+| 循环语句 |  \`\`\` for \(int i = 0; i |  |  |
+| 函数 |  \`\`\` int max\(int x, int y\) { return x &gt; y ? x : y; } int n = max\(1, 2\); \`\`\` |  \`\`\` sub max { my \($x, $y\) = @\_; return $x &gt; $y ? $x : $y; } my $n = max\(1, 2\) \`\`\` |  - 注意下划线 \`\`\` \_ \`\`\` 也是一个合法的变量名。而 \`\`\` @\_ \`\`\` 是Perl内置的数组变量，值为当前函数的参数列表 - \`\`\` my \($x, $y\) \`\`\` \`　表示声明了一个有两个元素的数组，并将两个元素映射到 $x 和 $y 上 - \`\`\` \($x, $y\) = @\_; \`\`\` 则表示两个数组之间的复制，@\_中对应的元素的值就赋值给了 $x 和 $y .这是一个简便的写法，也可以这样写 \`\`\` my $x = $\_\[0\]; my $y = $\_\[1\]; \`\`\` - return是可选的，默认返回最后一个表达式的值 |
+| 语法约束 |  \`\`\` - 编译时打开编译器所有的警告选项 - 使用lint工具 \`\`\` |  - \`\`\` perl -w myprogram.pl \`\`\` 打开运行警告开关，如果运行时Perl检查到了可能的错误，会显示警告信息，否则它默认是什么也不提示继续执行 - \`\`\` \#!/usr/bin/perl -w \`\`\` 在代码文件第一行中加入-w选项开关 - \`\`\` use strict; \`\`\` 使用严格语法约束 - \`\`\` use warning; \`\`\` 启用警告 |  |
+| 运行 | 编译后直接执行 |  - \`\`\` perl myprogram.pl \`\`\` - Unix下在代码第一行加入 \`\`\` \#!/usr/bin/perl \`\`\` ，然后给文件加上可执行属性 \`\`\` chmod +x myprogram.pl \`\`\` ，之后就可以用 \`\`\` ./myprogram.pl \`\`\` 命令来运行 - Windows下，安装ActivePerl后，将.pl后缀的文件和perl的解释程序关联起来，因此直接双击文件图标就可以运行 |  |
 
 需要说明的是，在Perl的世界中有一句名言"条条大路通罗马"， 这句话的意思是说同样一件事情Perl允许你用很多种不同的方式去做。因此上表的例子风格是按照C的习惯来写的，并且为了简化起见，只是挑选了与C相似的内容。事实上，Perl包含了很多C没有的东西，例如内置的Hash表、队列、正则表达式、格式定义等等。
 
-## 从框架开始 ##
+## 从框架开始 \#\#
 
 Perl有很多表达方式，我们可以选择一种自己熟悉、容易理解的方式来写Perl的程序。例如，你是一个经验丰富的C程序员，那么你可以选择以C的风格来写Perl程序。下面是一个小小的样板框架
 
-	#!/usr/bin/perl -w
-	use strict;
+```text
+#!/usr/bin/perl -w
+use strict;
+```
 
 ### 程序开始的第一行语句，调用main函数
 
-	main();
+```text
+main();
+```
 
 ### 定义main函数
 
-	sub main
-	{
-	       // some code
-	}
+```text
+sub main
+{
+       // some code
+}
+```
 
 在这个框架下面，你几乎可以容易就开始你的Perl开发了。如果需要处理命令行参数，就可以稍微的扩展一下这个框架。
 
 ### 处理命令行参数
 
-	#!/usr/bin/perl -w
-	use strict;
-	use Getopt::Std;
-	main();
+```text
+#!/usr/bin/perl -w
+use strict;
+use Getopt::Std;
+main();
 
-	my $configfile;
+my $configfile;
 
-	sub ProcessOptions
-	{
-	       my $VERSION = '1.0.0';
-	       my $USAGE = "pp.pl [-v | -c configfile]\n";
-	       my $opts={};
+sub ProcessOptions
+{
+       my $VERSION = '1.0.0';
+       my $USAGE = "pp.pl [-v | -c configfile]\n";
+       my $opts={};
 
-	       die $USAGE unless( getopts("c:v", $opts) );
-	       die $VERSION if ($opts->{'v'});
-	       $configfile=$opts->{'c'} ? $opts->{'c'} : 'config.xml' ;
-	}
+       die $USAGE unless( getopts("c:v", $opts) );
+       die $VERSION if ($opts->{'v'});
+       $configfile=$opts->{'c'} ? $opts->{'c'} : 'config.xml' ;
+}
 
-	sub main
-	{
-	       ProcessOptions();
-	       print $configfile;
+sub main
+{
+       ProcessOptions();
+       print $configfile;
 
-	       // the others code
-	}
+       // the others code
+}
+```
 
 实际上，剩余的工作和以往的工作差不多了，编写一个一个的函数，并实现你的业务逻辑。对于你这样一个聪明的程序员来说，学会Perl是一个很容易的事情。
 
-## 常见问题 ##
+## 常见问题 \#\#
 
 以我的学习经验来看，在开发的过程中可能有一些常用但是很分散的细节问题会让你感到困惑。
 
-1、  程序的入口参数怎么取？
+1、 程序的入口参数怎么取？
 
-内置数组@ARGV包含了所有的运行参数。可以打印出来看看 print @ARGV;  
+内置数组@ARGV包含了所有的运行参数。可以打印出来看看 print @ARGV;
 
-2、  函数如何传参数、取参数？
+2、 函数如何传参数、取参数？
 
-每个函数内部都有一个内置的数组 @_ ，这个数组的元素就是函数的参数。例如传入的第一个参数就是$_[0]，第二个是$_[1]。唔，如你所见，Perl的函数参数就是C中的动态参数。
+每个函数内部都有一个内置的数组 @ _，这个数组的元素就是函数的参数。例如传入的第一个参数就是$_\[0\]，第二个是$\_\[1\]。唔，如你所见，Perl的函数参数就是C中的动态参数。
 
-3、  默认变量是什么
+3、 默认变量是什么
 
-这个可能会把你的头搞晕。有一个内置变量 $_ ，
+这个可能会把你的头搞晕。有一个内置变量 $\_ ，
 
-4、  显示消息、退出常见的简单写法
+4、 显示消息、退出常见的简单写法
 
-    die &lsquo;Error on program&rsquo;;
+```text
+die &lsquo;Error on program&rsquo;;
+```
 
 也可以在条件不满足的情况下使用
 
-    die &lsquo;Configuration error&rsquo; unless($doc->getDocumentElement);
+```text
+die &lsquo;Configuration error&rsquo; unless($doc->getDocumentElement);
+```
 
-5、  格式化输出
+5、 格式化输出
 
 可以用简单的print语句进行一般的输出操作，如果需要复杂的格式化输出，可以使用printf语句......跟C的用法几乎是一样的。
 
-    printf("pi=%.6f", 355/113);
+```text
+printf("pi=%.6f", 355/113);
+```
 
-6、  =>是什么东西?
+6、 =&gt;是什么东西?
 
-在使用Hash表的时候，可以经常看到=>这个符号。例如这样的一个定义:
+在使用Hash表的时候，可以经常看到=&gt;这个符号。例如这样的一个定义:
 
-    my $account={
-            'Simon'=> 'simon.jinyu.liu@email.com',
-            'Cissy'=> 'cissy@email.com'
-    };
+```text
+my $account={
+        'Simon'=> 'simon.jinyu.liu@email.com',
+        'Cissy'=> 'cissy@email.com'
+};
+```
 
 其实，
-```
+
+```text
 =>
 ```
+
 符号跟逗号
-```
+
+```text
 ,
 ```
+
 是等价的。Perl里面的Hash表事实上是一个数组，只是把奇数位元素看做是Key（键），而把偶数位的元素看做是Value（值）。
 
-7、  关于引用的一点说明
+7、 关于引用的一点说明
 
-Perl的引用类似C的指针，所谓的引用事实上就是地址。取一个变量的地址用反斜杠"\"操作符，例如 $p=\$x; 那么$p就是一个指向$x变量的指针。要引用指针的值，使用"$"操作符，例如 print $$p; 就是打印$x的值。
+Perl的引用类似C的指针，所谓的引用事实上就是地址。取一个变量的地址用反斜杠"\"操作符，例如 $p=$x; 那么$p就是一个指向$x变量的指针。要引用指针的值，使用"$"操作符，例如 print $$p; 就是打印$x的值。
 
-引用不单单可以引用变量，也可以引用数组、HASH表、函数，取函数的地址可以使用*操作符。
+引用不单单可以引用变量，也可以引用数组、HASH表、函数，取函数的地址可以使用\*操作符。
 
-## 还能做什么 ##
+## 还能做什么 \#\#
 
 Perl作为一个功能强大的脚本语言，可以应用在Web 编程、数据库、XML、系统管理、图形图像、自然语言、压缩、加密、邮件系统、软件测试等各个地方。在CPAN上，你可以找到各种各样你所需要的模块支持。例如，你可以：
 
--         编写系统管理的脚本
--         和Apache结合起来，编写CGI程序
--         编写动态网页
--         使用Net命名空间下的类编写网络应用程序
--         使用Authen::Captcha模块实现提交时的验证码的功能
--         使用Storable模块处理Perl的各种数据结构
--         使用GD/Image::MagicK模块处理图形
--         等等...
+* 编写系统管理的脚本
+* 和Apache结合起来，编写CGI程序
+* 编写动态网页
+* 使用Net命名空间下的类编写网络应用程序
+* 使用Authen::Captcha模块实现提交时的验证码的功能
+* 使用Storable模块处理Perl的各种数据结构
+* 使用GD/Image::MagicK模块处理图形
+* 等等...
 
-## 资源 ##
+## 资源 \#\#
 
--         [www.perl.org           Perl的官方站点](http://www.perl.org)
--         [www.perl.com           O&rsquo;Reilly 维护的关于Perl的站点](http://www.perl.com)
--         [www.cpan.org           Perl的Module资源大全](http://www.cpan.org)
--         [www.perlchina.com      中国Perl协会](http://www.perlchina.com)
--         [www.pm.org             世界各地的Perl用户组织](http://www.pm.org)
--         [www.perlmonks.org      用Perl写诗](http://www.perlmonks.org)
--         http://www-128.ibm.com/developerworks/cn/linux/sdk/perl/ IBM社区的Perl系列文章
+* [www.perl.org           Perl的官方站点](http://www.perl.org)
+* [www.perl.com           O’Reilly 维护的关于Perl的站点](http://www.perl.com)
+* [www.cpan.org           Perl的Module资源大全](http://www.cpan.org)
+* [www.perlchina.com      中国Perl协会](http://www.perlchina.com)
+* [www.pm.org             世界各地的Perl用户组织](http://www.pm.org)
+* [www.perlmonks.org      用Perl写诗](http://www.perlmonks.org)
+* [http://www-128.ibm.com/developerworks/cn/linux/sdk/perl/](http://www-128.ibm.com/developerworks/cn/linux/sdk/perl/) IBM社区的Perl系列文章
 

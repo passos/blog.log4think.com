@@ -2,17 +2,18 @@
 title: 长距离打车如何省钱？
 date: '2008-11-18 23:02:52 +0800'
 ---
+
+# 2008-11-18  长距离打车如何省钱？
+
 学JavaScript的时候写的一个用于在长距离打车时，计算多远抬一次表最省钱的抬表方案的小程序，参数可以根据需要随意修改。
 
 X轴是距离，Y轴是费用，不同的颜色表示不同的抬表方案
 
 大致的简单结论是20公里以上的时候，每15公里抬一次表，能省出10%左右吧。
 
-<a href="http://log4think.com/wp-content/uploads/2008/11/taxi.jpg"><img src="http://log4think.com/wp-content/uploads/2008/11/taxi.jpg" alt="taxi" width="891" height="816" class="alignnone size-full wp-image-751" /></a>
-下面代码存为taxi.html，然后打开即可在浏览器中看到结果。
+ 下面代码存为taxi.html，然后打开即可在浏览器中看到结果。
 
------------------------------------------------
-```
+```text
 <html>
 <script type="text/javascript" src="http://www.walterzorn.com/scripts/wz_jsgraphics.js"></script>
 
@@ -157,3 +158,4 @@ jg.paint();
 </body>
 </html>
 ```
+

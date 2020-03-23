@@ -2,6 +2,9 @@
 title: 理解AnguarJS中的模板编译
 date: '2014-08-19 05:08:00 +0800'
 ---
+
+# 2014-08-19  理解AnguarJS中的模板编译
+
 在一开始学习AngularJS的过程中，模板的工作原理可能是最令人难解的问题之一。在其他的框架中，一般来说模板就是一个字符串，在这个字符串中使用一个特殊的表达方式可以嵌入一个传入的外部对象的数据，其本质上就是一个字符串的操作：输入字符串，输出字符串，然后通过`.innerHTML()`把所有搞出来的东西塞到DOM里面去。
 
 很明显AngularJS的模板不是这样做的。它有双向数据绑定，可以完美的在视图中与最新的数据模型同步。它还会自动在`ng-click`上注册事件监听器，甚至可以将视图中输入控件中的数据同步回数据模型。太神奇了！
@@ -10,15 +13,11 @@ date: '2014-08-19 05:08:00 +0800'
 
 这里有一个模板
 
-    <div ng-app>
-        <label>Name:</label>
-        <input type="text" ng-model="yourName" placeholder="Enter a name here">
-        # Hello {{yourName}}!
-    </div>
+ Name:  \# Hello {{yourName}}!
 
 如你所见，这是个最简单的AngularJS的应用页面。
 
-##反向控制（IoC）
+### 反向控制（IoC）
 
 第一个需要了解的概念是"反向控制"（IoC）。AngularJS不需要手工启动应用，而是假定你会遵循一定的规则在代码中放一些基本的设定。
 
@@ -26,12 +25,14 @@ date: '2014-08-19 05:08:00 +0800'
 
 AngularJS还会假定其他的框架不会接触到它的"根"节点下面的所有内容，否则可能会导致未知行为，或者打破双向数据绑定和事件监听器。
 
-##深入模板
+### 深入模板
 
-    <label>Name:</label>
-    <input type="text" ng-model="yourName" placeholder="Enter a name here">
+```text
+<label>Name:</label>
+<input type="text" ng-model="yourName" placeholder="Enter a name here">
+```
 
-# Hello {{yourName}}!
+## Hello !
 
 这一部分是模板。"根"节点下面的所有内容都会被视为模板，之后将会被编译。模板与数据模型（`$scope`）和控制器一起构成了动态视图，用户可以在浏览器中看到并与之交互。本例中没有控制器和明确的数据模型，但AngularJS会在后台创建对应的内容。
 
@@ -43,7 +44,7 @@ AngularJS还会假定其他的框架不会接触到它的"根"节点下面的所
 
 接下来看看如何将一个DOMElement转换成动态视图。
 
-##编译模板
+### 编译模板
 
 AngularJS找到`ng-app`指令之后，它会启动并创建一个新的`$rootScope`，开始编译"根"节点（带`ng-app`的那个节点）下面所有的子节点。
 
@@ -57,18 +58,21 @@ AngularJS找到`ng-app`指令之后，它会启动并创建一个新的`$rootSco
 
 上述过程的伪代码可以表示如下
 
-    var $compile = ...; //注入到你的代码
-    var $rootScope = ...; //注入
-    var parent = ...; //编译过的模板内容会被添加到该DOMElement下
-    var template = ...; //我们的模板的DOMElement
+```text
+var $compile = ...; //注入到你的代码
+var $rootScope = ...; //注入
+var parent = ...; //编译过的模板内容会被添加到该DOMElement下
+var template = ...; //我们的模板的DOMElement
 
-    var linkFn = $compile(template); //编译模板，返回"链接"函数
+var linkFn = $compile(template); //编译模板，返回"链接"函数
 
-    var element = linkFn(scope); //"链接"，返回处理好的DOMElement
+var element = linkFn(scope); //"链接"，返回处理好的DOMElement
 
-    parent.appendChild(element); //将处理好的DOMElement添加到父节点
+parent.appendChild(element); //将处理好的DOMElement添加到父节点
+```
 
-##总结
+### 总结
+
 基本就是这些了。如你所见，AngularJS完全不同于其他的模板系统，它约定了一些规则，并基于这些规则做了一些假定，之后你就不必将精力耗费在启动代码上，而可以放在真正的应用上。这只是AngularJS的一部分，之后会继续讲讲`$watch`和`$digest`如何保证视图刷新。
 
 via [src](http://daginge.com/technology/2014/03/04/understanding-template-compiling-in-angularjs/)
